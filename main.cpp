@@ -7,13 +7,11 @@
 
 using namespace std;
 
+
 void memberList(){
-
+	cout << "Members list";
+	
 }
-
-//Variables declaration here
-CSVObject bookList;
-CSVObject borrowList;
 
 //Create class/objects here
 class CSVObject {
@@ -37,7 +35,16 @@ class CSVObject {
 					continue;
 				}
 				//cout << "Found: " << findVal << endl;
-				returnStr[strArrIdx] = s.substr(prevPos,findVal-prevPos);
+				//cout << s.substr(findVal+1,1);
+				if(s.substr(prevPos+1,1)=="\""){
+					//cout << strArrIdx;
+					findVal = s.find("\",");
+					returnStr[strArrIdx] = s.substr(prevPos+1,findVal-prevPos-1);
+					cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
+				}
+				else{
+					returnStr[strArrIdx] = s.substr(prevPos,findVal-prevPos);
+				}
 				//cout << returnStr[strArrIdx] << " and " << s.substr(prevPos,findVal-1) << endl;
 				prevPos = findVal+1;
 				strArrIdx++;
@@ -45,17 +52,7 @@ class CSVObject {
 			returnStr[strArrIdx] = s.substr(prevPos,s.length()-prevPos);
 			//return returnStr;
 		}
-		/**
-		 * Split a string with a char delimitor into an array
-		 *//*
-		static void split_strtok(string s,const char* delim, string returnStr[255]){
-			int strIdx = 0;
-			char *token = strtok(s.c_str(),delim);
-			while(token!=NULL){
-				returnStr[strIdx] = token;
-				token = strtok(NULL,delim);
-			}
-		}*/
+		
 		/**
 		 * prints a string array
 		 */
@@ -92,13 +89,78 @@ class CSVObject {
 				//cout<<i<<endl;
 			}
 			fclose(csvfiles);
+			cout << elements[260][1];
 			return true;
+		}
+		
+		string getElement(int r,int c){
+			return elements[r][c];
+		}
+		
+		void setElement(string val,int r,int c){
+			elements[r][c] = val;
+		}
+		
+		void saveCSV(string fileLocation){
+			FILE* fw = fopen(fileLocation.c_str(),"w");
+			int skipLine = 0;
+			for(int r=0;r<1000;r++){
+				for(int c=0;c<255;c++){
+					if(elements[r][c]==""){
+						skipLine++;
+						continue;
+					}
+					fprintf(fw,"%s",elements[r][c].c_str() );
+					if(c!=254){fprintf(fw,",");}
+				}
+				if(skipLine!=255){
+					fprintf(fw,"\n");
+				}
+			}
+			fclose(fw);
 		}
 		
 	private:
 		string elements[1000][255];
 			
 };
+
+class Books{
+	public:
+		Books(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
+			bk_id = bkid;
+			bk_name = bkname;
+			bk_author = bkauthor;
+			bk_pub = bkpub;
+			bk_yr = bkyr;
+		}
+		Books(CSVObject csv){
+			bk_id = csv.getElement(1,1);
+		}
+	private:
+		string bk_id;
+		string bk_name;
+		string bk_author;
+		string bk_pub;
+		int bk_yr;
+};
+
+class Borrower{
+	public:
+		Borrower(string f_name,string l_name, string phone_no){
+			fname = f_name;
+			lname = l_name;
+			phoneno = phone_no;
+		}
+	private:
+		string fname;
+		string lname;
+		string phoneno;
+};
+
+//Variables declaration here
+CSVObject bookList;
+CSVObject borrowList;
 
 //Custom functions here
 bool checkYNvalid(char choice){
@@ -129,6 +191,8 @@ void returnBook(){
 void usefulFeaturesMenu(){
 
 }
+
+//MAIN FUNCTION
 
 int main(){
     char choice;
@@ -174,6 +238,8 @@ int main(){
 	else{
 	    cout << "No borrower list is imported \n";
 	}
+	
+	cout << bookList.getElement(260,1) << endl;
 	
 	//MAIN MENU
 	do{
