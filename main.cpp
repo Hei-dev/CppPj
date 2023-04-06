@@ -4,9 +4,11 @@
 #include <string>
 #include <cstring>
 #include <filesystem>
+//#include <regex>
 
 using namespace std;
 
+char dum;
 
 void memberList(){
 	cout << "Members list";
@@ -16,6 +18,7 @@ void memberList(){
 //Create class/objects here
 class CSVObject {
 	public :
+		[[deprecated("Function seems to not work.")]]
 		static bool fileExist(string path){
 			FILE* _f = fopen(path.c_str(),"r");
 			return (_f!=NULL);
@@ -29,22 +32,61 @@ class CSVObject {
 		static void split(string s, string delim, string returnStr[255]){
 			int findVal = 0, prevPos = 0;
 			int strArrIdx = 0;
+			//Iterate through each delim
 			do{
-				findVal = s.find(delim, prevPos);
-				if(findVal==string::npos){ //If it did not found a string
-					continue;
-				}
-				//cout << "Found: " << findVal << endl;
-				//cout << s.substr(findVal+1,1);
-				if(s.substr(prevPos+1,1)=="\""){
-					//cout << strArrIdx;
-					findVal = s.find("\",");
-					returnStr[strArrIdx] = s.substr(prevPos+1,findVal-prevPos-1);
-					cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
+				//Check if it is quoted
+				if((s.substr(prevPos==0 ? 0 : prevPos-1,2)==",\"") ){
+					/*
+						TODO: 
+						-Check for double quote (""lorem ipsum"")
+						-remember it (double_quote = true)
+						-for the closing double quote, set to false again
+						-check if it is "",
+							-True -> find next ",
+					*/
+					//Check for """,
+					int _prevPos = prevPos;
+					int _findVal; 
+
+					findVal = s.find("\",",_prevPos)+1;
+					if(findVal==string::npos){ //If it did not found a string
+						continue;
+					}
+					
+					//Special case check: comma after quote
+					if(s.substr(findVal-3,4)!="\"\"\"," && s.substr(findVal-2,3)=="\"\","){				
+						do{
+							//Prevent finding the same one again
+							_prevPos = findVal;
+							findVal = s.find("\",",_prevPos)+1;
+						}while(!((s.substr(findVal-3,4)=="\"\"\",") || (s.substr(findVal-2,3)!="\"\",")));/**/
+					}
+
+
+					//findVal = s.find("\",",_prevPos)+1;
+
+					returnStr[strArrIdx] = s.substr(prevPos+1,findVal-2-prevPos);
 				}
 				else{
+					findVal = s.find(delim, prevPos); // find the ,
+					if(findVal==string::npos){ //If it did not found a string
+						continue;
+					}
 					returnStr[strArrIdx] = s.substr(prevPos,findVal-prevPos);
 				}
+
+				int findDoubleQuote = 0, prevDoubleQuote = 0;
+				do{
+					findDoubleQuote = returnStr[strArrIdx].find("\"\"",0);
+					if(findDoubleQuote!=string::npos){
+						returnStr[strArrIdx] = returnStr[strArrIdx].replace(findDoubleQuote,2,"\"");
+					}
+				}while(findDoubleQuote!=string::npos);
+
+
+				cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
+					cout << prevPos << "," << findVal << endl;
+
 				//cout << returnStr[strArrIdx] << " and " << s.substr(prevPos,findVal-1) << endl;
 				prevPos = findVal+1;
 				strArrIdx++;
@@ -54,7 +96,9 @@ class CSVObject {
 		}
 		
 		/**
-		 * prints a string array
+		 * @brief Prints an array of string
+		 * 
+		 * @param str the string array to be printed
 		 */
 		static void printStringArray(string str[255]){
 			for(int _=0;_<255;_++){cout << str[_] << ",";}
@@ -71,6 +115,13 @@ class CSVObject {
 		    }
 		}
 		
+		/**
+		 * @brief Reads the csv files and store them
+		 * 
+		 * @param fileLocation the path to the file
+		 * @return true The result is successfully stored
+		 * @return false There is an error during file reading.
+		 */
 		bool readCSV(string fileLocation){
 			if(!fileExist(fileLocation)){
 				return false;
@@ -84,12 +135,13 @@ class CSVObject {
 			int i=0;
 			while (fgets(line, sizeof line, csvfiles) != NULL ){
 				//cout << line;
+				cout<<i << ". ";
 				split(line,",",elements[i]);
 				i++;
-				//cout<<i<<endl;
+				cout << endl;
 			}
 			fclose(csvfiles);
-			cout << elements[260][1];
+			cout << elements[76][1];
 			return true;
 		}
 		
