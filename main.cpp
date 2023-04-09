@@ -179,6 +179,15 @@ class CSVObject {
 
 class Books{
 	public:
+		/**
+		 * @brief Construct a new Books object with parameters
+		 * 
+		 * @param bkid The book's ID
+		 * @param bkname The book's name
+		 * @param bkauthor The book's author
+		 * @param bkpub The book's publisher
+		 * @param bkyr The book's year
+		 */
 		Books(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
 			bk_id = bkid;
 			bk_name = bkname;
@@ -186,9 +195,17 @@ class Books{
 			bk_pub = bkpub;
 			bk_yr = bkyr;
 		}
-		Books(CSVObject csv){
-			bk_id = csv.getElement(1,1);
-		}
+		
+		void setBookId(string id){bk_id = id;}
+		void setBookName(string str){bk_name = str;}
+		void setBookName(string str){bk_author = str;}
+		void setBookName(string str){bk_pub = str;}
+		void setBookYear(int yr){bk_yr = yr;}
+		string getBookId(){return bk_id;}
+		string getBookName(){return bk_name;}
+		string getBookAuthor(){return bk_author;}
+		string getBookPublisher(){return bk_pub;}
+		int getBookYear(){return bk_yr;}
 	private:
 		string bk_id;
 		string bk_name;
@@ -204,6 +221,12 @@ class Borrower{
 			lname = l_name;
 			phoneno = phone_no;
 		}
+		void setFirstName(string str){fname = str;}
+		void setLastName(string str){lname = str;}
+		void setPhoneNo(string str){phoneno = str;}
+		string getFirstName(){return fname;}
+		string getLastName(){return lname;}
+		string getPhoneNo(){return phoneno;}
 	private:
 		string fname;
 		string lname;
@@ -213,6 +236,9 @@ class Borrower{
 //Variables declaration here
 CSVObject bookList;
 CSVObject borrowList;
+
+Books books[1000];
+Borrower borrowers[1000];
 
 //Custom functions here
 bool checkYNvalid(char choice){
@@ -224,22 +250,99 @@ bool checkYN(char choice){
 }
 
 //Main functions here
+//R1
 void manageBooks(){
+	char choice;
+	do{
+		cout << "*** Manage Books ***" << endl;
+		cout << "[1] Display books" << endl;
+		cout << "[2] Search book" << endl;
+		cout << "[3] Add book" << endl;
+		cout << "[4] Remove book" << endl;
+		cout << "[5] Back" << endl;
+		cout << "********************" << endl;
+		cout << "Option (1 - 5):" << endl;
+
+		cin >> choice;
+
+		switch (choice){
+			case '1': displayBooks(); break;
+			case '2': searchBooks(); break;
+			case '3': addBooks(); break;
+			case '4': removeBooks(); break;
+			case '5': break;
+		}
+	}while(choice!='5');
+}
+
+void displayBooks(){
 
 }
 
+void searchBooks(){
+
+}
+
+void addBooks(){
+
+}
+
+void removeBooks(){
+
+}
+
+//R2
 void manageBorrowers(){
+	char choice;
+	do{
+		cout << "*** Manage Books ***" << endl;
+		cout << "[1] Display borrowers" << endl;
+		cout << "[2] Search borrowers" << endl;
+		cout << "[3] Add borrowers" << endl;
+		cout << "[4] Remove borrowers" << endl;
+		cout << "[5] Back" << endl;
+		cout << "********************" << endl;
+		cout << "Option (1 - 5):" << endl;
+
+		cin >> choice;
+
+		switch (choice){
+			case '1': displayBorrowers(); break;
+			case '2': searchBorrowers(); break;
+			case '3': addBorrowers(); break;
+			case '4': removeBorrowers(); break;
+			case '5': break;
+		}
+	}while(choice!='5');
+}
+
+void displayBorrowers(){
+
+}
+
+void searchBorrowers(){
+
+}
+
+void addBorrowers(){
+
+}
+
+void removeBorrowers(){
 	
 }
 
+//R3
 void borrowBook(){
 
 }
 
+//R4
 void returnBook(){
 
 }
 
+//R5
 void usefulFeaturesMenu(){
 
 }
@@ -252,6 +355,7 @@ int main(){
     do{
         cout << "Import book list from file? [Y/N]: ";
         cin >> choice;
+		choice = toupper(choice);
         if(!checkYNvalid(choice)){
             cout << "Invalid input, please type again.\n";
 		}
@@ -261,8 +365,19 @@ int main(){
 	    cout << "Path of book list file: ";
 	    cin >> path;
 	    cout << "Importing book list... ";
-	    if(bookList.readCSV(path))
+	    if(bookList.readCSV(path)){
+			for(int i=0;i<1000;i++){
+				if(bookList.getElement(i,0)==""){continue;}
+				books[i] = Books(
+					bookList.getElement(i,0), //ID
+					bookList.getElement(i,1), //Mame
+					bookList.getElement(i,2), //Author
+					bookList.getElement(i,3), //Publisher
+					stoi(bookList.getElement(i,4)) //Year
+				);
+			}
 	    	cout << "Done\n";
+		}
 		else
 			cout << "Error while importing. Book list will not be imported.\n";
 	}
@@ -274,6 +389,7 @@ int main(){
     do{
         cout << "Import borrower list from file? [Y/N]: ";
         cin >> choice;
+		choice = toupper(choice);
         if(!checkYNvalid(choice))
             cout << "Invalid input, please type again.\n";
     }while(!checkYNvalid(choice));
@@ -282,8 +398,16 @@ int main(){
 	    cout << "Path of borrower list file: ";
 	    cin >> path;
 	    cout << "Importing borrower list... ";
-	    if(borrowList.readCSV(path))
-	    	cout << "Done\n";
+	    if(borrowList.readCSV(path)){
+			for(int i=0;i<1000;i++){
+				borrowers[i] = Borrower(
+					borrowList.getElement(i,0), //First Name
+					borrowList.getElement(i,1), //Last Name
+					borrowList.getElement(i,2) //Phone number
+				);
+			}
+			cout << "Done\n";
+		}
 		else
 			cout << "Error while importing. Borrower list will not be imported.\n";
 	}
@@ -314,7 +438,15 @@ int main(){
 			case '4': returnBook(); break;
 			case '5': usefulFeaturesMenu(); break;
 			case '6': memberList(); break;
-			case '7': /*Do nothing*/ break;
+			case '7':
+				char quit;
+				cout << "Are you sure you want to quit? (Y/N): ";
+				do{
+					cin >> quit;
+					quit = toupper(quit);
+					if(quit!='Y'||quit!='N'){cout << "invalid input. Please type again.";}
+				}while(quit!='Y'||quit!='N');
+			break;
 		}
 	}while(choice!='7');
 
