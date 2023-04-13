@@ -195,11 +195,19 @@ class Books{
 			bk_pub = bkpub;
 			bk_yr = bkyr;
 		}
+		Books(){}
+		void setBooks(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
+			bk_id = bkid;
+			bk_name = bkname;
+			bk_author = bkauthor;
+			bk_pub = bkpub;
+			bk_yr = bkyr;
+		}
 		
 		void setBookId(string id){bk_id = id;}
 		void setBookName(string str){bk_name = str;}
-		void setBookName(string str){bk_author = str;}
-		void setBookName(string str){bk_pub = str;}
+		void setBookAuthor(string str){bk_author = str;}
+		void setBookPublisher(string str){bk_pub = str;}
 		void setBookYear(int yr){bk_yr = yr;}
 		string getBookId(){return bk_id;}
 		string getBookName(){return bk_name;}
@@ -217,6 +225,12 @@ class Books{
 class Borrower{
 	public:
 		Borrower(string f_name,string l_name, string phone_no){
+			fname = f_name;
+			lname = l_name;
+			phoneno = phone_no;
+		}
+		Borrower(){}
+		void setBorrower(string f_name,string l_name, string phone_no){
 			fname = f_name;
 			lname = l_name;
 			phoneno = phone_no;
@@ -251,6 +265,59 @@ bool checkYN(char choice){
 
 //Main functions here
 //R1
+void displayBooks(){
+
+}
+
+void findDoubleQuote(string inp, int positions[]){
+	int pos = -1, i=0;
+	do{
+		pos = inp.find("\"",pos+1);
+		positions[i] = pos;
+		cout << "i" << i << endl;
+		i++;
+	}while(pos!=string::npos || pos+1!=inp.length());
+	if(i%2==1){
+		positions[i-2] = string::npos;
+	}
+}
+
+//R1.2
+void searchBooks(){
+	string inp;
+	string keywords[100];
+	int quotePos[100];
+	cout << "Please enter the keyword(s): ";
+	cin >> inp;
+	/*
+		Steps:
+		1. Extract Terms with ""
+		2. Split the remaining string with space
+		3. Store them into an array.
+	*/
+	findDoubleQuote(inp,quotePos);
+	int i=0;
+	do{
+		keywords[i] = inp.substr(quotePos[i],quotePos[i+1]);
+		i+=2;
+	}while(quotePos[i-1]!=string::npos || quotePos[i]!=string::npos);
+	for(i=0;i<100;i++){
+		cout << keywords[i] << endl;
+	}
+	for(i=0;i<1000;i++){
+		//cout << books[i].getBookName() << endl;
+	}
+}
+
+void addBooks(){
+
+}
+
+void removeBooks(){
+
+}
+
+//R1
 void manageBooks(){
 	char choice;
 	do{
@@ -275,23 +342,23 @@ void manageBooks(){
 	}while(choice!='5');
 }
 
-void displayBooks(){
-
-}
-
-void searchBooks(){
-
-}
-
-void addBooks(){
-
-}
-
-void removeBooks(){
-
-}
-
 //R2
+void displayBorrowers(){
+
+}
+
+void searchBorrowers(){
+
+}
+
+void addBorrowers(){
+
+}
+
+void removeBorrowers(){
+	
+}
+//R2 main
 void manageBorrowers(){
 	char choice;
 	do{
@@ -314,22 +381,6 @@ void manageBorrowers(){
 			case '5': break;
 		}
 	}while(choice!='5');
-}
-
-void displayBorrowers(){
-
-}
-
-void searchBorrowers(){
-
-}
-
-void addBorrowers(){
-
-}
-
-void removeBorrowers(){
-	
 }
 
 //R3
