@@ -29,13 +29,14 @@ class CSVObject {
 		 * @param delim - the string that decides the boundary for each element of the array
 		 * @param returnStr[255] - the string array to be written into
 		 */
-		static void split(string s, string delim, string returnStr[255]){
+		static int split(string s, string delim, string returnStr[255]){
 			int findVal = 0, prevPos = 0;
 			int strArrIdx = 0;
 			//Iterate through each delim
 			do{
 				//Check if it is quoted
-				if((s.substr(prevPos==0 ? 0 : prevPos-1,2)==",\"") ){
+				//Somewhat hacky way to do it, but it's alright
+				if((s.substr(prevPos==0 ? 0 : prevPos-1,2)==",\"") && delim==","){
 					/*
 						TODO: 
 						-Check for double quote (""lorem ipsum"")
@@ -92,7 +93,7 @@ class CSVObject {
 				strArrIdx++;
 			}while(findVal!=string::npos);
 			returnStr[strArrIdx] = s.substr(prevPos,s.length()-prevPos);
-			//return returnStr;
+			return strArrIdx;
 		}
 		
 		/**
@@ -273,10 +274,11 @@ void findDoubleQuote(string inp, int positions[]){
 	int pos = -1, i=0;
 	do{
 		pos = inp.find("\"",pos+1);
+		if(pos==-1){break;}
 		positions[i] = pos;
-		cout << "i" << i << endl;
+		cout << "i: " << i  << ",Pos: " << pos << endl;
 		i++;
-	}while(pos!=string::npos || pos+1!=inp.length());
+	}while(pos!=string::npos || pos<inp.length() || pos!=-1);
 	if(i%2==1){
 		positions[i-2] = string::npos;
 	}
@@ -288,7 +290,8 @@ void searchBooks(){
 	string keywords[100];
 	int quotePos[100];
 	cout << "Please enter the keyword(s): ";
-	cin >> inp;
+	cin.ignore(); //To make this work
+	getline (cin, inp);
 	/*
 		Steps:
 		1. Extract Terms with ""
@@ -296,11 +299,15 @@ void searchBooks(){
 		3. Store them into an array.
 	*/
 	findDoubleQuote(inp,quotePos);
-	int i=0;
-	do{
-		keywords[i] = inp.substr(quotePos[i],quotePos[i+1]);
-		i+=2;
-	}while(quotePos[i-1]!=string::npos || quotePos[i]!=string::npos);
+	int keywordsLen = CSVObject::split(inp," ",keywords);
+	int i=keywordsLen;
+	if(quotePos[0]==-1 || quotePos[1]==-1){
+		do{
+			keywords[i] = inp.substr(quotePos[i],quotePos[i+1]);
+			i+=2;
+		}while(quotePos[i-1]!=string::npos || quotePos[i]!=string::npos);
+	}
+	
 	for(i=0;i<100;i++){
 		cout << keywords[i] << endl;
 	}
