@@ -85,8 +85,8 @@ class CSVObject {
 				}while(findDoubleQuote!=string::npos);
 
 
-				cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
-					cout << prevPos << "," << findVal << endl;
+				//cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
+				//cout << prevPos << "," << findVal << endl;
 
 				//cout << returnStr[strArrIdx] << " and " << s.substr(prevPos,findVal-1) << endl;
 				prevPos = findVal+1;
@@ -136,13 +136,13 @@ class CSVObject {
 			int i=0;
 			while (fgets(line, sizeof line, csvfiles) != NULL ){
 				//cout << line;
-				cout<<i << ". ";
+				//cout<<i << ". ";
 				split(line,",",elements[i]);
 				i++;
 				cout << endl;
 			}
 			fclose(csvfiles);
-			cout << elements[76][1];
+			//cout << elements[76][1];
 			return true;
 		}
 		
@@ -274,18 +274,34 @@ void findDoubleQuote(string inp, int positions[]){
 	int pos = -1, i=0;
 	do{
 		pos = inp.find("\"",pos+1);
-		if(pos==-1){break;}
+		//if(pos==-1){break;}
 		positions[i] = pos;
 		cout << "i: " << i  << ",Pos: " << pos << endl;
 		i++;
 	}while(pos!=string::npos || pos<inp.length() || pos!=-1);
+	positions[i] = -1;
+	positions[i+1] = -1;
 	if(i%2==1){
-		positions[i-2] = string::npos;
+		positions[i-1] = -1;
 	}
 }
 
 //R1.2
 void searchBooks(){
+	/*
+		Steps:
+		-Read every char 1 by 1
+		--if it is alphanumeric, concat it into a string
+		--if it is a space, store the sring into an array, and reset the string
+		--if it is a ",
+		---if it is the first time, record it, ignore the following space until...
+		---if second time, set quoted to false, and store the string into an array, and reset the string.
+	*/
+}
+
+//R1.2
+[[deprecated("It does not work and overcomplicating lol")]]
+void searchBooksD(){
 	string inp;
 	string keywords[100];
 	int quotePos[100];
@@ -294,26 +310,35 @@ void searchBooks(){
 	getline (cin, inp);
 	/*
 		Steps:
-		1. Extract Terms with ""
+		1. Extract Terms with "" and store them in an array
+		1.5 Remove all keywords wrapped with "" in the string
 		2. Split the remaining string with space
 		3. Store them into an array.
 	*/
 	findDoubleQuote(inp,quotePos);
-	int keywordsLen = CSVObject::split(inp," ",keywords);
-	int i=keywordsLen;
-	if(quotePos[0]==-1 || quotePos[1]==-1){
+	string ninp = inp;
+	if(quotePos[0]!=-1 || quotePos[1]!=-1){
+		int i=0;
+		int prevPos1 = 0, prevPos2 = 0;
 		do{
-			keywords[i] = inp.substr(quotePos[i],quotePos[i+1]);
+			prevPos1 = quotePos[i];
+			prevPos2 = quotePos[1+1];
+			keywords[i] = inp.substr(prevPos1+1,prevPos2-1);
+			cout << "K: " << keywords[i] << "," << quotePos[i] << "," << quotePos[i+1] << endl;
+			ninp.erase(prevPos1,prevPos2-prevPos1+1);
+			//prevPos1 = quotePos[i+1]+1;
 			i+=2;
-		}while(quotePos[i-1]!=string::npos || quotePos[i]!=string::npos);
+		}while(quotePos[i]!=-1);
 	}
 	
-	for(i=0;i<100;i++){
-		cout << keywords[i] << endl;
+	string keyword_single[100];
+	CSVObject::split(ninp," ",keyword_single);
+	cout << ninp << endl;
+	for(int i=0;i<100;i++){
+		if(keywords[i]!=""){cout << i << keywords[i] << endl;}
+		if(keyword_single[i]!=""){cout << i << "s: " << keyword_single[i] << endl;}
 	}
-	for(i=0;i<1000;i++){
-		//cout << books[i].getBookName() << endl;
-	}
+	
 }
 
 void addBooks(){
