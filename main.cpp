@@ -139,7 +139,6 @@ class CSVObject {
 				//cout<<i << ". ";
 				split(line,",",elements[i]);
 				i++;
-				cout << endl;
 			}
 			fclose(csvfiles);
 			//cout << elements[76][1];
@@ -264,6 +263,14 @@ bool checkYN(char choice){
     return (choice=='Y');
 }
 
+bool checkEmptyString(string s){
+    return s=="";
+}
+string toUppercase(string s){
+    for(int i=0;i<s.length();i++){
+        s = toupper(s[i]);
+    }
+}
 //Main functions here
 //R1
 void displayBooks(){
@@ -285,7 +292,11 @@ void findDoubleQuote(string inp, int positions[]){
 		positions[i-1] = -1;
 	}
 }
-
+bool checkMatchingBook(string bk,string kw,bool caseSensitive){
+    if(caseSensitive){
+        
+    }
+}
 //R1.2
 void searchBooks(){
 	/*
@@ -294,9 +305,57 @@ void searchBooks(){
 		--if it is alphanumeric, concat it into a string
 		--if it is a space, store the sring into an array, and reset the string
 		--if it is a ",
-		---if it is the first time, record it, ignore the following space until...
+		---if it is the first time, record it, ignore the following spaces until...
 		---if second time, set quoted to false, and store the string into an array, and reset the string.
 	*/
+	string inp;
+	string keywords[100];
+	int quotePos[100];
+	cout << "Please enter the keyword(s): ";
+	cin.ignore(); //To make this work
+	getline (cin, inp);
+	
+	int i=0;
+	int j=0;
+	string concatStr = "";
+	bool isDoubleQuoted = false;
+	//Phrase the keywords
+	for(int i=0;i<inp.length();i++){
+	    if(inp[i]==' ' && !isDoubleQuoted && concatStr!=""){
+	        keywords[j] = concatStr;
+	        cout << j << endl;
+	        concatStr = "";
+	        j++;
+	    }
+	    else if(inp[i]=='"'){
+	        isDoubleQuoted = !isDoubleQuoted;
+	        if(!isDoubleQuoted && concatStr!=""){
+	            keywords[j] = concatStr;
+	            //cout << "Quoted: " << j << concatStr << endl;
+	            concatStr = "";
+	            j++;
+	        }
+	    }
+	    else{
+	        concatStr+=inp[i];
+	    }
+	}
+	keywords[j] = concatStr;
+	
+	//DEBUG print phrased keywords
+	for(int i=0;i<100;i++){
+		if(keywords[i]!=""){cout << i << keywords[i] << endl;}
+	}
+	
+	//the find function SAVES AGAIN!
+	for(int i=0;i<1000;i++){
+	    for(string kw : keywords){
+	        if(books[i].getBookName().find(kw)!=string::npos && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())){
+	            cout<<"Found: "<<books[i].getBookName()<<endl;
+	        }
+	    }
+	    //if(books[i].find())
+	}
 }
 
 //R1.2
