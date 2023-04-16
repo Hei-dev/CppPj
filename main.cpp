@@ -9,6 +9,7 @@
 using namespace std;
 
 char dum;
+int numbooks = 0;
 
 void memberList(){
 	cout << "Members list";
@@ -195,6 +196,10 @@ class Books{
 			bk_pub = bkpub;
 			bk_yr = bkyr;
 		}
+		/**
+		 * @brief Construct a new empty Books object
+		 * 
+		 */
 		Books(){}
 		void setBooks(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
 			bk_id = bkid;
@@ -203,23 +208,40 @@ class Books{
 			bk_pub = bkpub;
 			bk_yr = bkyr;
 		}
+
+		/**
+		 * @brief Check if the provided book is the same as itself
+		 * 
+		 * @param bk the Books to compare
+		 */
+		bool equal(Books bk){
+			return (
+				bk_id == bk.getBookId()
+			&&  bk_name == bk.getBookName()
+			&&  bk_author == bk.getBookAuthor()
+			&&  bk_pub == bk.getBookPublisher()
+			&&  bk_yr == bk.getBookYear());
+		}
 		
 		void setBookId(string id){bk_id = id;}
 		void setBookName(string str){bk_name = str;}
 		void setBookAuthor(string str){bk_author = str;}
 		void setBookPublisher(string str){bk_pub = str;}
 		void setBookYear(int yr){bk_yr = yr;}
+		void setBookBorrowed(bool isBorrowed){bk_borrowed = isBorrowed;}
 		string getBookId(){return bk_id;}
 		string getBookName(){return bk_name;}
 		string getBookAuthor(){return bk_author;}
 		string getBookPublisher(){return bk_pub;}
 		int getBookYear(){return bk_yr;}
+		bool isBookBorrowed(){return bk_borrowed;}
 	private:
 		string bk_id;
 		string bk_name;
 		string bk_author;
 		string bk_pub;
 		int bk_yr;
+		bool bk_borrowed = false;
 };
 
 class Borrower{
@@ -238,13 +260,72 @@ class Borrower{
 		void setFirstName(string str){fname = str;}
 		void setLastName(string str){lname = str;}
 		void setPhoneNo(string str){phoneno = str;}
+		/**
+		 * @brief Borrow a book to the borrower
+		 * 
+		 * @param book the book to be borrowed
+		 */
+		void addBorrowedBook(Books book){
+			if(borrowedNo>=5){
+				cout  << "Borrow limit reached, cannot borrow more books.";
+				return;
+			}
+			if(book.isBookBorrowed()){
+				cout << "Book is already borrowed";
+				return;
+			}
+			for(Books bk:borrowedBooks){
+				if(bk.equal(book)){
+					cout << "Book is already borrowed";
+					return;
+				}
+			}
+			borrowedBooks[borrowedNo] = book;
+			borrowedNo++;
+		}
+		/**
+		 * @brief return a book from the borrower
+		 * 
+		 * @param book the book to be returned
+		 */
+		void removeBorrowedBook(Books book){
+			int i; bool flag = false;
+			for(i=0;i<5;i++){
+				Books bk = borrowedBooks[i];
+				if(book.equal(bk)){
+					flag=true;
+					borrowedNo--;
+				}
+				if(flag && (i+1)<5){
+					borrowedBooks[i] = borrowedBooks[i+1];
+				}
+				else if((i+1)<5){
+					borrowedBooks[i] = Books();
+				}
+			}
+			borrowedBooks[i] = borrowedBooks[i+1];
+		}
 		string getFirstName(){return fname;}
 		string getLastName(){return lname;}
 		string getPhoneNo(){return phoneno;}
+		/**
+		 * @brief Get the Borrowed Books object and *stores* it into the array provided
+		 * 
+		 * @param bks the array used to store the borrowed book
+		 */
+		void getBorrowedBooks(Books bks[]){bks = borrowedBooks;}
+		/**
+		 * @brief Get the number of borrowed books by the user.
+		 * 
+		 * @return int the total number of borrowed books by the borrower
+		 */
+		int getBorrowedNo(){return borrowedNo;}
 	private:
 		string fname;
 		string lname;
 		string phoneno;
+		Books borrowedBooks[5];
+		int borrowedNo = 0;
 };
 
 //Variables declaration here
@@ -270,6 +351,7 @@ string toUppercase(string s){
     for(int i=0;i<s.length();i++){
         s = toupper(s[i]);
     }
+	return s;
 }
 //Main functions here
 //R1
@@ -277,6 +359,12 @@ void displayBooks(){
 
 }
 
+/**
+ * @brief Search for the locations of double quotes (") in a string, and returns it in an integer array.
+ * 
+ * @param inp the string to search on
+ * @param positions the int array to be stroed
+ */
 void findDoubleQuote(string inp, int positions[]){
 	int pos = -1, i=0;
 	do{
@@ -292,10 +380,28 @@ void findDoubleQuote(string inp, int positions[]){
 		positions[i-1] = -1;
 	}
 }
-bool checkMatchingBook(string bk,string kw,bool caseSensitive){
-    if(caseSensitive){
-        
+/**
+ * @brief Check if the book info contains keyword
+ * 
+ * @param bk the Book object to be searched
+ * @param kw the keyword to be searched
+ * @param caseSensitive if set to true, only exact cases will be matched
+ */
+bool checkMatchingBook(Books bk,string kw,bool caseSensitive){
+	Books t_bk = bk;
+    if(!caseSensitive){ //Case Insensitive
+        t_bk.setBookName(toUppercase(t_bk.getBookName()));
+        t_bk.setBookAuthor(toUppercase(t_bk.getBookAuthor()));
+        t_bk.setBookPublisher(toUppercase(t_bk.getBookPublisher()));
+		kw = toUppercase(kw);
     }
+	cout << (t_bk.getBookName().find(kw)!=string::npos) << (t_bk.getBookAuthor().find(kw)!=string::npos) << (t_bk.getBookId().find(kw)!=string::npos) << (t_bk.getBookPublisher().find(kw)!=string::npos) << endl;
+	return (
+			(t_bk.getBookName().find(kw)!=string::npos)
+		||  (t_bk.getBookAuthor().find(kw)!=string::npos)
+		||  (t_bk.getBookId().find(kw)!=string::npos)
+		||  (t_bk.getBookPublisher().find(kw)!=string::npos)
+	);
 }
 //R1.2
 void searchBooks(){
@@ -313,7 +419,7 @@ void searchBooks(){
 	int quotePos[100];
 	cout << "Please enter the keyword(s): ";
 	cin.ignore(); //To make this work
-	getline (cin, inp);
+	getline(cin, inp);
 	
 	int i=0;
 	int j=0;
@@ -350,11 +456,12 @@ void searchBooks(){
 	//the find function SAVES AGAIN!
 	for(int i=0;i<1000;i++){
 	    for(string kw : keywords){
-	        if(books[i].getBookName().find(kw)!=string::npos && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())){
-	            cout<<"Found: "<<books[i].getBookName()<<endl;
+	        if(checkMatchingBook(books[i],kw,false) && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())){
+	            cout << "Searching " << kw << "\n";
+				cout<<"Found: " << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() <<endl;
+				cout << "================" << endl;
 	        }
 	    }
-	    //if(books[i].find())
 	}
 }
 
@@ -400,9 +507,74 @@ void searchBooksD(){
 	
 }
 
-void addBooks(){
-
+bool idunique(string id) {
+    for (int i = 0; i < numbooks; i++) {
+        if (books[i].getBookId() == id) {
+            return false;
+        }
+    }
+    return true;
 }
+
+bool yearpositive(int year) {
+    return year > 0;
+}
+
+void addBooks() {
+    string id, title, author, publisher;
+    int year;
+
+    cout << "Enter book ID: ";
+    getline(cin, id);
+    while (id.length() > 10 || !idunique(id)) {
+        cout << "This ID is more than 10 characters! Enter book ID:";
+        cout << "Enter book ID:";
+        getline(cin, id);
+    }
+        
+    cout << "Enter book title: ";
+    getline(cin, title);
+    while (title.length() > 100) {
+        cout << "The title is more than 100 characters!";
+        cout << "Enter book title:";
+        getline(cin, title);
+    }
+
+    cout << "Enter book author (if the book has more than one author, separated by ';'): ";
+    getline(cin, author);
+    while (author.length() > 50) {
+        cout << "The authors are more than 50 characters!: ";
+        cout << "Enter book author: ";
+        getline(cin, author);
+    }
+
+    cout << "Enter book publisher: ";
+    getline(cin, publisher);
+    while (publisher.length() > 50) {
+        cout << "The publisher is more then 50 characters!";
+        cout << "Enter book publisher: ";
+        getline(cin, publisher);
+    }
+
+    cout << "Enter book year: ";
+    cin >> year;
+    while (!yearpositive(year)) {
+        cout << "The year is not positive!";
+        cout << "Enter book year: ";
+        cin >> year;
+        cin.clear();
+        cin.ignore(numeric_limits < streamsize > ::max(), '\n');
+        cin.ignore();
+    }
+        
+    cin.ignore();
+
+    books[numbooks] = Books(id, title, author, publisher, year);
+    numbooks++;
+
+    cout << "Book added sucessfully!\n";
+}
+
 
 void removeBooks(){
 
@@ -517,6 +689,7 @@ int main(){
 					bookList.getElement(i,3), //Publisher
 					stoi(bookList.getElement(i,4)) //Year
 				);
+				numbooks++;
 			}
 	    	cout << "Done\n";
 		}
