@@ -265,19 +265,19 @@ class Borrower{
 		 * 
 		 * @param book the book to be borrowed
 		 */
-		void addBorrowedBook(Books book){
+		bool addBorrowedBook(Books book){
 			if(borrowedNo>=5){
 				cout  << "Borrow limit reached, cannot borrow more books.";
-				return;
+				return false;
 			}
 			if(book.isBookBorrowed()){
 				cout << "Book is already borrowed";
-				return;
+				return false;
 			}
 			for(Books bk:borrowedBooks){
 				if(bk.equal(book)){
 					cout << "Book is already borrowed";
-					return;
+					return false;
 				}
 			}
 			borrowedBooks[borrowedNo] = book;
