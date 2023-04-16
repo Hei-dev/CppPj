@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
@@ -264,6 +266,7 @@ class Borrower{
 		 * @brief Borrow a book to the borrower
 		 * 
 		 * @param book the book to be borrowed
+		 * @returns true if book is successfully borrowed, false otherwise
 		 */
 		bool addBorrowedBook(Books book){
 			if(borrowedNo>=5){
