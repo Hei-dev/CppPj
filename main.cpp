@@ -352,7 +352,7 @@ bool checkEmptyString(string s){
 }
 string toUppercase(string s){
     for(int i=0;i<s.length();i++){
-        s = toupper(s[i]);
+        s[i] = toupper(s[i]);
     }
 	return s;
 }
@@ -398,7 +398,9 @@ bool checkMatchingBook(Books bk,string kw,bool caseSensitive){
         t_bk.setBookPublisher(toUppercase(t_bk.getBookPublisher()));
 		kw = toUppercase(kw);
     }
-	cout << (t_bk.getBookName().find(kw)!=string::npos) << (t_bk.getBookAuthor().find(kw)!=string::npos) << (t_bk.getBookId().find(kw)!=string::npos) << (t_bk.getBookPublisher().find(kw)!=string::npos) << endl;
+	if(kw==""){return false;}
+	//cout << (t_bk.getBookName().find(kw)) << " " << (t_bk.getBookAuthor().find(kw)) << " " << (t_bk.getBookId().find(kw)) << " " << (t_bk.getBookPublisher().find(kw)) << endl;
+	//cout << kw;
 	return (
 			(t_bk.getBookName().find(kw)!=string::npos)
 		||  (t_bk.getBookAuthor().find(kw)!=string::npos)
@@ -460,6 +462,7 @@ void searchBooks(){
 	for(int i=0;i<1000;i++){
 	    for(string kw : keywords){
 	        if(checkMatchingBook(books[i],kw,false) && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())){
+				//Temp. displaying method, will see what R1.1's display method is
 	            cout << "Searching " << kw << "\n";
 				cout<<"Found: " << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() <<endl;
 				cout << "================" << endl;
