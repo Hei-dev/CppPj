@@ -6,12 +6,18 @@
 #include <string>
 #include <cstring>
 #include <filesystem>
+#include <algorithm>
+
+#include <stdlib.h>
 //#include <regex>
 
 using namespace std;
 
 char dum;
 int numbooks = 0;
+int numBorrowers = 0;
+
+string _;
 
 void memberList(){
 	cout << "Members list";
@@ -529,7 +535,7 @@ bool yearpositive(int year) {
 void addBooks() {
     string id, title, author, publisher;
     int year;
-
+	cin.ignore(); //To make this work
     cout << "Enter book ID: ";
     getline(cin, id);
     while (id.length() > 10 || !idunique(id)) {
@@ -590,6 +596,7 @@ void removeBooks(){
 void manageBooks(){
 	char choice;
 	do{
+		system("cls");
 		cout << "*** Manage Books ***" << endl;
 		cout << "[1] Display books" << endl;
 		cout << "[2] Search book" << endl;
@@ -606,8 +613,11 @@ void manageBooks(){
 			case '2': searchBooks(); break;
 			case '3': addBooks(); break;
 			case '4': removeBooks(); break;
-			case '5': break;
+			case '5': cout << "Qutting..."; break;
+			default: cout << "Non-valid choice, please enter again."; break;
 		}
+		cout << "\n";
+		system("pause");
 	}while(choice!='5');
 }
 
@@ -617,11 +627,89 @@ void displayBorrowers(){
 }
 
 void searchBorrowers(){
-
+	int id;
+	cin.ignore();
+	cout << "Enter the borrower ID to search: ";
+	do{
+		cin >> id;
+		if(cin.fail()){
+			cout << "Invalid input, please try again.";
+		}
+	}while(cin.fail());
+	if(id>numBorrowers-1){
+		cout << "No borrower found.";
+	}
+	else if(borrowers[id].getLastName()!=""){
+		cout << "Borrower found";
+		cout << "Borrower ID: " << id << endl;
+    	cout << "Last name: " << borrowers[id].getLastName() << endl;
+    	cout << "First name: " << borrowers[id].getFirstName() << endl;
+    	cout << "Contact number: " << borrowers[id].getPhoneNo() << endl;
+	}
+	else{
+		cout << "No borrower found.";
+	}
 }
 
-void addBorrowers(){
+string capitalize(string str) {
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+    string result = "";
+    bool capitalizeNext = true;
+    for (char c : str) {
+        if (isspace(c)) {
+            capitalizeNext = true;
+        }
+        else if (capitalizeNext) {
+            result += toupper(c);
+            capitalizeNext = false;
+        }
+        else {
+            result += c;
+        }
+    }
+    return result;
+}
 
+bool validContactNumber(string contactNumber) {
+    return (contactNumber.length() == 8) && (contactNumber[0] == '2' || contactNumber[0] == '3' || contactNumber[0] == '5' || contactNumber[0] == '6' || contactNumber[0] == '9');
+}
+
+void addBorrowers() {
+    if (numBorrowers >= 1000) {
+        cout << "Error: borrower list is full." << endl;
+        return;
+    }
+
+    Borrower nborrower;
+    string lastName, firstName, contactNumber;
+	cin.ignore(); //To make this work
+    cout << "Enter last name: ";
+    getline(cin, lastName);
+    cout << "Enter first name: ";
+    getline(cin, firstName);
+    cout << "Enter contact number: ";
+    getline(cin, contactNumber);
+
+    lastName = toUppercase(lastName);
+    firstName = capitalize(firstName);
+
+    if (!validContactNumber(contactNumber)) {
+        cout << "Invalid contact number." << endl;
+        return;
+    }
+
+    nborrower.setLastName(lastName);
+    nborrower.setFirstName(firstName);
+    nborrower.setPhoneNo(contactNumber);
+
+    borrowers[numBorrowers] = nborrower;
+    numBorrowers++;
+
+    cout << "\nBorrower added successfully." << endl;
+    cout << "Borrower ID: " << numBorrowers << endl;
+    cout << "Last name: " << nborrower.getLastName() << endl;
+    cout << "First name: " << nborrower.getFirstName() << endl;
+    cout << "Contact number: " << nborrower.getPhoneNo() << endl;
 }
 
 void removeBorrowers(){
@@ -631,6 +719,7 @@ void removeBorrowers(){
 void manageBorrowers(){
 	char choice;
 	do{
+		system("cls");
 		cout << "*** Manage Books ***" << endl;
 		cout << "[1] Display borrowers" << endl;
 		cout << "[2] Search borrowers" << endl;
@@ -647,8 +736,11 @@ void manageBorrowers(){
 			case '2': searchBorrowers(); break;
 			case '3': addBorrowers(); break;
 			case '4': removeBorrowers(); break;
-			case '5': break;
+			case '5': cout << "Qutting..."; break;
+			default: cout << "Non-valid choice, please enter again."; break;
 		}
+		cout << "\n";
+		system("pause");
 	}while(choice!='5');
 }
 
@@ -721,11 +813,13 @@ int main(){
 	    cout << "Importing borrower list... ";
 	    if(borrowList.readCSV(path)){
 			for(int i=0;i<1000;i++){
+				if(borrowList.getElement(i,0)==""){continue;}
 				borrowers[i] = Borrower(
 					borrowList.getElement(i,0), //First Name
 					borrowList.getElement(i,1), //Last Name
 					borrowList.getElement(i,2) //Phone number
 				);
+				numBorrowers++;
 			}
 			cout << "Done\n";
 		}
@@ -735,11 +829,13 @@ int main(){
 	else{
 	    cout << "No borrower list is imported \n";
 	}
-	
-	cout << bookList.getElement(260,1) << endl;
+
+	cout << "Setup completed.\n";
+	system("pause");
 	
 	//MAIN MENU
 	do{
+		system("cls");
 		cout << "*** Library Management System ***" << endl;
 		cout << "[1] Manage books" << endl;
 		cout << "[2] Manage borrowers" << endl;
@@ -765,8 +861,11 @@ int main(){
 				do{
 					cin >> quit;
 					quit = toupper(quit);
-					if(quit!='Y'||quit!='N'){cout << "invalid input. Please type again.";}
-				}while(quit!='Y'||quit!='N');
+					//cout << quit;
+					//cout << (quit!='Y') << " " << (quit!='N');
+					if(quit!='Y'&&quit!='N'){cout << "invalid input. Please type again.";}
+					else if(quit=='N'){choice=8;}
+				}while(quit!='Y'&&quit!='N');
 			break;
 		}
 	}while(choice!='7');
