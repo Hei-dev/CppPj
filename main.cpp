@@ -24,6 +24,24 @@ void memberList(){
 	
 }
 
+void pressContinue(){
+	#if _WIN32
+		system("pause");
+	#else
+		cout << "Press enter to cntinue...\n";
+		system("read");
+	#endif
+}
+
+void clrScr(){
+	#if _WIN32
+		system("cls");
+	#else
+		cout << "Please wait...\n";
+		system("clear");
+	#endif
+}
+
 //Create class/objects here
 class CSVObject {
 	public :
@@ -162,14 +180,53 @@ class CSVObject {
 			elements[r][c] = val;
 		}
 		
+		/**
+ * @brief Search for the locations of the string user inputted in a string, and returns it in an integer array.
+ * 
+ * @param findStr the string to search for
+ * @param inp the string to search on
+ * @param positions the int array to be stroed
+ */
+void finds(string findStr,string inp, int positions[]){
+	int pos = -1, i=0;
+	do{
+		pos = inp.find(findStr,pos+1);
+		//if(pos==-1){break;}
+		positions[i] = pos;
+		cout << "i: " << i  << ",Pos: " << pos << endl;
+		i++;
+	}while(pos!=string::npos || pos<inp.length() || pos!=-1);
+}
+		
 		void saveCSV(string fileLocation){
 			FILE* fw = fopen(fileLocation.c_str(),"w");
+			string dum_csv[1000][255];
+			
 			int skipLine = 0;
 			for(int r=0;r<1000;r++){
 				for(int c=0;c<255;c++){
-					if(elements[r][c]==""){
+					dum_csv[r][c] = elements[r][c];
+					if(dum_csv[r][c]==""){
+						//cout << "continue" << endl;
 						skipLine++;
 						continue;
+					}
+					//Looks for quote and add quote
+					int positions[16];
+					fill_n(positions,16,-1);
+					finds("\"",dum_csv[r][c],positions);
+					for(int i=9;i>=0;i--){
+						if(positions[i]==string::npos || positions[i]==-1){
+							//cout << "NPOS" << endl;
+							continue;
+						}
+						//cout << positions[i] << endl;
+						dum_csv[r][c].insert(positions[i],"\"");
+					}
+					
+					if(dum_csv[r][c].find(",",0)!=string::npos){
+						dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
+						cout << dum_csv[r][c] << endl;
 					}
 					fprintf(fw,"%s",elements[r][c].c_str() );
 					if(c!=254){fprintf(fw,",");}
@@ -183,6 +240,8 @@ class CSVObject {
 		
 	private:
 		string elements[1000][255];
+		
+		
 			
 };
 
@@ -596,7 +655,7 @@ void removeBooks(){
 void manageBooks(){
 	char choice;
 	do{
-		system("cls");
+		clrScr();
 		cout << "*** Manage Books ***" << endl;
 		cout << "[1] Display books" << endl;
 		cout << "[2] Search book" << endl;
@@ -617,7 +676,7 @@ void manageBooks(){
 			default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
-		system("pause");
+		pressContinue();
 	}while(choice!='5');
 }
 
@@ -719,8 +778,8 @@ void removeBorrowers(){
 void manageBorrowers(){
 	char choice;
 	do{
-		system("cls");
-		cout << "*** Manage Books ***" << endl;
+		clrScr();
+		cout << "*** Manage Borrowers ***" << endl;
 		cout << "[1] Display borrowers" << endl;
 		cout << "[2] Search borrowers" << endl;
 		cout << "[3] Add borrowers" << endl;
@@ -740,7 +799,7 @@ void manageBorrowers(){
 			default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
-		system("pause");
+		pressContinue();
 	}while(choice!='5');
 }
 
@@ -754,9 +813,50 @@ void returnBook(){
 
 }
 
+void exportCSV(){
+	string path;
+	cout << "Enter the path and file name for the Book List: ";
+	cin >> path;
+	CSVObject ncsv_bk;
+	for(int i=0;i<1000;i++){
+		ncsv_bk.setElement(books[i].getBookId(),i,0);
+		ncsv_bk.setElement(books[i].getBookName(),i,1);
+		ncsv_bk.setElement(books[i].getBookAuthor(),i,2);
+		ncsv_bk.setElement(books[i].getBookPublisher(),i,3);
+		ncsv_bk.setElement(to_string(books[i].getBookYear()),i,4);
+	}
+	ncsv_bk.saveCSV(path);
+	/*
+	or(int i=0;i<1000;i++){
+		ncsv_bk.setElement(ncsv_bk.getBookId(),i,0);
+		ncsv_bk.setElement(ncsv_bk.getBookName(),i,0);
+		ncsv_bk.setElement(ncsv_bk.getBookAuthor(),i,0);
+		ncsv_bk.setElement(ncsv_bk.getBookPublisher(),i,0);
+		ncsv_bk.setElement(ncsv_bk.getBookYear(),i,0);
+	}*/
+}
+
 //R5
 void usefulFeaturesMenu(){
+	char choice;
+	do{
+		clrScr();
+		cout << "*** Usful features ***" << endl;
+		cout << "[1] Export CSV" << endl;
+		cout << "[5] Back" << endl;
+		cout << "********************" << endl;
+		cout << "Option (1 - 5):" << endl;
 
+		cin >> choice;
+
+		switch (choice){
+			case '1': exportCSV(); break;
+			case '5': cout << "Qutting..."; break;
+			default: cout << "Non-valid choice, please enter again."; break;
+		}
+		cout << "\n";
+		pressContinue();
+	}while(choice!='5');
 }
 
 //MAIN FUNCTION
@@ -831,11 +931,11 @@ int main(){
 	}
 
 	cout << "Setup completed.\n";
-	system("pause");
+	pressContinue();
 	
 	//MAIN MENU
 	do{
-		system("cls");
+		clrScr();
 		cout << "*** Library Management System ***" << endl;
 		cout << "[1] Manage books" << endl;
 		cout << "[2] Manage borrowers" << endl;
