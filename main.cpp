@@ -188,7 +188,7 @@ public:
 		FILE* fw = fopen(fileLocation.c_str(), "w");
 		string dum_csv[1000][5];
 
-		int skipLine = 0;
+		bool skipLine = 0;
 		for (int r = 0; r < 1000; r++) {
 			for (int c = 0; c < 5; c++) {
 				dum_csv[r][c] = elements[r][c];
@@ -217,6 +217,10 @@ public:
 				}/**/
 
 				bool hasComma = false;
+				if(dum_csv[r][c] == ""){
+					skipLine = true;
+					continue;
+				}
 				for (int k = 0; k < dum_csv[r][c].length(); k++) {
 					if (dum_csv[r][c][k] == '\"') {
 						dum_csv[r][c].insert(k, "\"");
@@ -228,15 +232,20 @@ public:
 				}/**/
 				if (hasComma) {
 					dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
-					cout << dum_csv[r][c] << endl;
+					//cout << dum_csv[r][c] << endl;
 				}
 				if (dum_csv[r][0] != "") {
 					fprintf(fw, "%s", dum_csv[r][c].c_str());
+					//some very hacky code to make it work
+					if ((c != 4 && dum_csv[r][4]!="") || (c != 3 && dum_csv[r][4]=="")) { fprintf(fw, ","); }
 				}
-				if (c != 4) { fprintf(fw, ","); }
+				
 			}
-			if (skipLine != 5) {
+			if (!skipLine) {
 				fprintf(fw, "\n");
+			}
+			else{
+				skipLine = false;
 			}
 		}
 		fclose(fw);
