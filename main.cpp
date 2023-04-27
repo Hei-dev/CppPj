@@ -13,387 +13,391 @@
 
 using namespace std;
 
-char dum;
 int numbooks = 0;
 int numBorrowers = 0;
 
 string _;
 
-void memberList(){
+void memberList() {
 	cout << "Members list";
-	
+
 }
 
-void pressContinue(){
-	#if _WIN32
-		system("pause");
-	#else
-		cout << "Press enter to cntinue...\n";
-		system("read");
-	#endif
+void pressContinue() {
+#if _WIN32
+	system("pause");
+#else
+	cout << "Press enter to cntinue...\n";
+	system("read");
+#endif
 }
 
-void clrScr(){
-	#if _WIN32
-		system("cls");
-	#else
-		cout << "Please wait...\n";
-		system("clear");
-	#endif
+void clrScr() {
+#if _WIN32
+	system("cls");
+#else
+	cout << "Please wait...\n";
+	system("clear");
+#endif
 }
 
 //Create class/objects here
 class CSVObject {
-	public :
-		[[deprecated("Function seems to not work.")]]
-		static bool fileExist(string path){
-			FILE* _f = fopen(path.c_str(),"r");
-			return (_f!=NULL);
-		}
-		/**
-		 * Split a string with a string delimitor into an array
-		 * @param s - the string to be splitted
-		 * @param delim - the string that decides the boundary for each element of the array
-		 * @param returnStr[255] - the string array to be written into
-		 */
-		static int split(string s, string delim, string returnStr[255]){
-			int findVal = 0, prevPos = 0;
-			int strArrIdx = 0;
-			//Iterate through each delim
-			do{
-				//Check if it is quoted
-				//Somewhat hacky way to do it, but it's alright
-				if((s.substr(prevPos==0 ? 0 : prevPos-1,2)==",\"") && delim==","){
-					/*
-						TODO: 
-						-Check for double quote (""lorem ipsum"")
-						-remember it (double_quote = true)
-						-for the closing double quote, set to false again
-						-check if it is "",
-							-True -> find next ",
-					*/
-					//Check for """,
-					int _prevPos = prevPos;
-					int _findVal; 
+public:
+	[[deprecated("Function seems to not work.")]]
+	static bool fileExist(string path) {
+		FILE* _f = fopen(path.c_str(), "r");
+		return (_f != NULL);
+	}
+	/**
+	 * Split a string with a string delimitor into an array
+	 * @param s - the string to be splitted
+	 * @param delim - the string that decides the boundary for each element of the array
+	 * @param returnStr[255] - the string array to be written into
+	 */
+	static int split(string s, string delim, string returnStr[]) {
+		int findVal = 0, prevPos = 0;
+		int strArrIdx = 0;
+		//Iterate through each delim
+		do {
+			//Check if it is quoted
+			//Somewhat hacky way to do it, but it's alright
+			if ((s.substr(prevPos == 0 ? 0 : prevPos - 1, 2) == ",\"") && delim == ",") {
+				/*
+					TODO:
+					-Check for double quote (""lorem ipsum"")
+					-remember it (double_quote = true)
+					-for the closing double quote, set to false again
+					-check if it is "",
+						-True -> find next ",
+				*/
+				//Check for """,
+				int _prevPos = prevPos;
+				int _findVal;
 
-					findVal = s.find("\",",_prevPos)+1;
-					if(findVal==string::npos){ //If it did not found a string
+				findVal = s.find("\",", _prevPos) + 1;
+				if (findVal == string::npos) { //If it did not found a string
+					continue;
+				}
+
+				//Special case check: comma after quote
+				if (s.substr(findVal - 3, 4) != "\"\"\"," && s.substr(findVal - 2, 3) == "\"\",") {
+					do {
+						//Prevent finding the same one again
+						_prevPos = findVal;
+						findVal = s.find("\",", _prevPos) + 1;
+					} while (!((s.substr(findVal - 3, 4) == "\"\"\",") || (s.substr(findVal - 2, 3) != "\"\",")));/**/
+				}
+
+
+				//findVal = s.find("\",",_prevPos)+1;
+
+				returnStr[strArrIdx] = s.substr(prevPos + 1, findVal - 2 - prevPos);
+			}
+			else {
+				findVal = s.find(delim, prevPos); // find the ,
+				if (findVal == string::npos) { //If it did not found a string
+					continue;
+				}
+				returnStr[strArrIdx] = s.substr(prevPos, findVal - prevPos);
+			}
+
+			int findDoubleQuote = 0, prevDoubleQuote = 0;
+			do {
+				findDoubleQuote = returnStr[strArrIdx].find("\"\"", 0);
+				if (findDoubleQuote != string::npos) {
+					returnStr[strArrIdx] = returnStr[strArrIdx].replace(findDoubleQuote, 2, "\"");
+				}
+			} while (findDoubleQuote != string::npos);
+
+
+			//cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
+			//cout << prevPos << "," << findVal << endl;
+
+			//cout << returnStr[strArrIdx] << " and " << s.substr(prevPos,findVal-1) << endl;
+			prevPos = findVal + 1;
+			strArrIdx++;
+		} while (findVal != string::npos);
+		returnStr[strArrIdx] = s.substr(prevPos, s.length() - prevPos);
+		return strArrIdx;
+	}
+
+	/**
+	 * @brief Prints an array of string
+	 *
+	 * @param str the string array to be printed
+	 */
+	static void printStringArray(string str[255]) {
+		for (int _ = 0; _ < 255; _++) { cout << str[_] << ","; }
+	}
+
+	/**
+	 * @brief Reads the csv files and store them
+	 *
+	 * @param fileLocation the path to the file
+	 * @return true The result is successfully stored
+	 * @return false There is an error during file reading.
+	 */
+	bool readCSV(string fileLocation) {
+
+		int dum;
+		//cout << fileLocation.c_str();
+		//cin >> dum;
+		FILE* csvfiles = fopen(fileLocation.c_str(), "r");
+		if (csvfiles == NULL) { return false; }
+		char line[255];
+		int i = 0;
+		while (fgets(line, sizeof line, csvfiles) != NULL) {
+			//cout << line;
+			//cout<<i << ". ";
+			split(line, ",", elements[i]);
+			i++;
+		}
+		fclose(csvfiles);
+		//cout << elements[76][1];
+		return true;
+	}
+
+	string getElement(int r, int c) {
+		return elements[r][c];
+	}
+
+	void setElement(string val, int r, int c) {
+		elements[r][c] = val;
+	}
+
+	/**
+	 * @brief Search for the locations of the string user inputted in a string, and returns it in an integer array.
+	 *
+	 * @param findStr the string to search for
+	 * @param inp the string to search on
+	 * @param positions the int array to be stroed
+	 */
+	void finds(string findStr, string inp, int positions[]) {
+		int pos = -1, i = 0;
+		do {
+			pos = inp.find(findStr, pos + 1);
+			//if(pos==-1){break;}
+			positions[i] = pos;
+			cout << "i: " << i << ",Pos: " << pos << endl;
+			i++;
+		} while (pos != string::npos || pos < inp.length() || pos != -1);
+	}
+
+	void saveCSV(string fileLocation) {
+		FILE* fw = fopen(fileLocation.c_str(), "w");
+		string dum_csv[1000][5];
+
+		int skipLine = 0;
+		for (int r = 0; r < 1000; r++) {
+			for (int c = 0; c < 5; c++) {
+				dum_csv[r][c] = elements[r][c];
+				/*
+				if(dum_csv[r][c]==""){
+					//cout << "continue" << endl;
+					skipLine++;
+					continue;
+				}
+				//Looks for quote and add quote
+				int positions[16];
+				fill_n(positions,16,-1);
+				finds("\"",dum_csv[r][c],positions);
+				for(int i=9;i>=0;i--){
+					if(positions[i]==string::npos || positions[i]==-1){
+						//cout << "NPOS" << endl;
 						continue;
 					}
-					
-					//Special case check: comma after quote
-					if(s.substr(findVal-3,4)!="\"\"\"," && s.substr(findVal-2,3)=="\"\","){				
-						do{
-							//Prevent finding the same one again
-							_prevPos = findVal;
-							findVal = s.find("\",",_prevPos)+1;
-						}while(!((s.substr(findVal-3,4)=="\"\"\",") || (s.substr(findVal-2,3)!="\"\",")));/**/
-					}
-
-
-					//findVal = s.find("\",",_prevPos)+1;
-
-					returnStr[strArrIdx] = s.substr(prevPos+1,findVal-2-prevPos);
-				}
-				else{
-					findVal = s.find(delim, prevPos); // find the ,
-					if(findVal==string::npos){ //If it did not found a string
-						continue;
-					}
-					returnStr[strArrIdx] = s.substr(prevPos,findVal-prevPos);
+					//cout << positions[i] << endl;
+					dum_csv[r][c].insert(positions[i],"\"");
 				}
 
-				int findDoubleQuote = 0, prevDoubleQuote = 0;
-				do{
-					findDoubleQuote = returnStr[strArrIdx].find("\"\"",0);
-					if(findDoubleQuote!=string::npos){
-						returnStr[strArrIdx] = returnStr[strArrIdx].replace(findDoubleQuote,2,"\"");
+				if(dum_csv[r][c].find(",",0)!=string::npos){
+					dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
+					cout << dum_csv[r][c] << endl;
+				}/**/
+
+				bool hasComma = false;
+				for (int k = 0; k < dum_csv[r][c].length(); k++) {
+					if (dum_csv[r][c][k] == '\"') {
+						dum_csv[r][c].insert(k, "\"");
+						k++;
 					}
-				}while(findDoubleQuote!=string::npos);
-
-
-				//cout << strArrIdx << ": " << returnStr[strArrIdx] << endl;
-				//cout << prevPos << "," << findVal << endl;
-
-				//cout << returnStr[strArrIdx] << " and " << s.substr(prevPos,findVal-1) << endl;
-				prevPos = findVal+1;
-				strArrIdx++;
-			}while(findVal!=string::npos);
-			returnStr[strArrIdx] = s.substr(prevPos,s.length()-prevPos);
-			return strArrIdx;
-		}
-		
-		/**
-		 * @brief Prints an array of string
-		 * 
-		 * @param str the string array to be printed
-		 */
-		static void printStringArray(string str[255]){
-			for(int _=0;_<255;_++){cout << str[_] << ",";}
-		}
-		
-		void printTable(){
-		    for(int r=0;r<1000;r++){
-		        for(int c=0;c<255;c++){
-		            if(elements[r][c]!=""){
-		                cout << setw(15) << elements[r][c];
-		            }
-		        }
-		        cout << endl;
-		    }
-		}
-		
-		/**
-		 * @brief Reads the csv files and store them
-		 * 
-		 * @param fileLocation the path to the file
-		 * @return true The result is successfully stored
-		 * @return false There is an error during file reading.
-		 */
-		bool readCSV(string fileLocation){
-			if(!fileExist(fileLocation)){
-				return false;
+					else if (dum_csv[r][c][k] == ',') {
+						hasComma = true;
+					}
+				}/**/
+				if (hasComma) {
+					dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
+					cout << dum_csv[r][c] << endl;
+				}
+				if (dum_csv[r][0] != "") {
+					fprintf(fw, "%s", dum_csv[r][c].c_str());
+				}
+				if (c != 4) { fprintf(fw, ","); }
 			}
-		    int dum;
-		    //cout << fileLocation.c_str();
-		    //cin >> dum;
-			FILE* csvfiles=fopen(fileLocation.c_str(),"r");
-			if(csvfiles==NULL){return false;}
-			char line[255];
-			int i=0;
-			while (fgets(line, sizeof line, csvfiles) != NULL ){
-				//cout << line;
-				//cout<<i << ". ";
-				split(line,",",elements[i]);
-				i++;
+			if (skipLine != 5) {
+				fprintf(fw, "\n");
 			}
-			fclose(csvfiles);
-			//cout << elements[76][1];
-			return true;
 		}
-		
-		string getElement(int r,int c){
-			return elements[r][c];
-		}
-		
-		void setElement(string val,int r,int c){
-			elements[r][c] = val;
-		}
-		
-		/**
- * @brief Search for the locations of the string user inputted in a string, and returns it in an integer array.
- * 
- * @param findStr the string to search for
- * @param inp the string to search on
- * @param positions the int array to be stroed
- */
-void finds(string findStr,string inp, int positions[]){
-	int pos = -1, i=0;
-	do{
-		pos = inp.find(findStr,pos+1);
-		//if(pos==-1){break;}
-		positions[i] = pos;
-		cout << "i: " << i  << ",Pos: " << pos << endl;
-		i++;
-	}while(pos!=string::npos || pos<inp.length() || pos!=-1);
-}
-		
-		void saveCSV(string fileLocation){
-			FILE* fw = fopen(fileLocation.c_str(),"w");
-			string dum_csv[1000][255];
-			
-			int skipLine = 0;
-			for(int r=0;r<1000;r++){
-				for(int c=0;c<255;c++){
-					dum_csv[r][c] = elements[r][c];
-					if(dum_csv[r][c]==""){
-						//cout << "continue" << endl;
-						skipLine++;
-						continue;
-					}
-					//Looks for quote and add quote
-					int positions[16];
-					fill_n(positions,16,-1);
-					finds("\"",dum_csv[r][c],positions);
-					for(int i=9;i>=0;i--){
-						if(positions[i]==string::npos || positions[i]==-1){
-							//cout << "NPOS" << endl;
-							continue;
-						}
-						//cout << positions[i] << endl;
-						dum_csv[r][c].insert(positions[i],"\"");
-					}
-					
-					if(dum_csv[r][c].find(",",0)!=string::npos){
-						dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
-						cout << dum_csv[r][c] << endl;
-					}
-					fprintf(fw,"%s",elements[r][c].c_str() );
-					if(c!=254){fprintf(fw,",");}
-				}
-				if(skipLine!=255){
-					fprintf(fw,"\n");
-				}
-			}
-			fclose(fw);
-		}
-		
-	private:
-		string elements[1000][255];
-		
-		
-			
+		fclose(fw);
+	}
+
+private:
+	string elements[1000][5/*Temp. set to 5 to prevent stack overflow error*/];
+
+
+
 };
 
-class Books{
-	public:
-		/**
-		 * @brief Construct a new Books object with parameters
-		 * 
-		 * @param bkid The book's ID
-		 * @param bkname The book's name
-		 * @param bkauthor The book's author
-		 * @param bkpub The book's publisher
-		 * @param bkyr The book's year
-		 */
-		Books(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
-			bk_id = bkid;
-			bk_name = bkname;
-			bk_author = bkauthor;
-			bk_pub = bkpub;
-			bk_yr = bkyr;
-		}
-		/**
-		 * @brief Construct a new empty Books object
-		 * 
-		 */
-		Books(){}
-		void setBooks(string bkid,string bkname,string bkauthor, string bkpub, int bkyr){
-			bk_id = bkid;
-			bk_name = bkname;
-			bk_author = bkauthor;
-			bk_pub = bkpub;
-			bk_yr = bkyr;
-		}
+class Books {
+public:
+	/**
+	 * @brief Construct a new Books object with parameters
+	 *
+	 * @param bkid The book's ID
+	 * @param bkname The book's name
+	 * @param bkauthor The book's author
+	 * @param bkpub The book's publisher
+	 * @param bkyr The book's year
+	 */
+	Books(string bkid, string bkname, string bkauthor, string bkpub, int bkyr) {
+		bk_id = bkid;
+		bk_name = bkname;
+		bk_author = bkauthor;
+		bk_pub = bkpub;
+		bk_yr = bkyr;
+	}
+	/**
+	 * @brief Construct a new empty Books object
+	 *
+	 */
+	Books() {}
+	void setBooks(string bkid, string bkname, string bkauthor, string bkpub, int bkyr) {
+		bk_id = bkid;
+		bk_name = bkname;
+		bk_author = bkauthor;
+		bk_pub = bkpub;
+		bk_yr = bkyr;
+	}
 
-		/**
-		 * @brief Check if the provided book is the same as itself
-		 * 
-		 * @param bk the Books to compare
-		 */
-		bool equal(Books bk){
-			return (
-				bk_id == bk.getBookId()
-			&&  bk_name == bk.getBookName()
-			&&  bk_author == bk.getBookAuthor()
-			&&  bk_pub == bk.getBookPublisher()
-			&&  bk_yr == bk.getBookYear());
-		}
-		
-		void setBookId(string id){bk_id = id;}
-		void setBookName(string str){bk_name = str;}
-		void setBookAuthor(string str){bk_author = str;}
-		void setBookPublisher(string str){bk_pub = str;}
-		void setBookYear(int yr){bk_yr = yr;}
-		void setBookBorrowed(bool isBorrowed){bk_borrowed = isBorrowed;}
-		string getBookId(){return bk_id;}
-		string getBookName(){return bk_name;}
-		string getBookAuthor(){return bk_author;}
-		string getBookPublisher(){return bk_pub;}
-		int getBookYear(){return bk_yr;}
-		bool isBookBorrowed(){return bk_borrowed;}
-	private:
-		string bk_id;
-		string bk_name;
-		string bk_author;
-		string bk_pub;
-		int bk_yr;
-		bool bk_borrowed = false;
+	/**
+	 * @brief Check if the provided book is the same as itself
+	 *
+	 * @param bk the Books to compare
+	 */
+	bool equal(Books bk) {
+		return (
+			bk_id == bk.getBookId()
+			&& bk_name == bk.getBookName()
+			&& bk_author == bk.getBookAuthor()
+			&& bk_pub == bk.getBookPublisher()
+			&& bk_yr == bk.getBookYear());
+	}
+
+	void setBookId(string id) { bk_id = id; }
+	void setBookName(string str) { bk_name = str; }
+	void setBookAuthor(string str) { bk_author = str; }
+	void setBookPublisher(string str) { bk_pub = str; }
+	void setBookYear(int yr) { bk_yr = yr; }
+	void setBookBorrowed(bool isBorrowed) { bk_borrowed = isBorrowed; }
+	string getBookId() { return bk_id; }
+	string getBookName() { return bk_name; }
+	string getBookAuthor() { return bk_author; }
+	string getBookPublisher() { return bk_pub; }
+	int getBookYear() { return bk_yr; }
+	bool isBookBorrowed() { return bk_borrowed; }
+private:
+	string bk_id;
+	string bk_name;
+	string bk_author;
+	string bk_pub;
+	int bk_yr;
+	bool bk_borrowed = false;
 };
 
-class Borrower{
-	public:
-		Borrower(string f_name,string l_name, string phone_no){
-			fname = f_name;
-			lname = l_name;
-			phoneno = phone_no;
+class Borrower {
+public:
+	Borrower(string f_name, string l_name, string phone_no) {
+		fname = f_name;
+		lname = l_name;
+		phoneno = phone_no;
+	}
+	Borrower() {}
+	void setBorrower(string f_name, string l_name, string phone_no) {
+		fname = f_name;
+		lname = l_name;
+		phoneno = phone_no;
+	}
+	void setFirstName(string str) { fname = str; }
+	void setLastName(string str) { lname = str; }
+	void setPhoneNo(string str) { phoneno = str; }
+	/**
+	 * @brief Borrow a book to the borrower
+	 *
+	 * @param book the book to be borrowed
+	 * @returns true if book is successfully borrowed, false otherwise
+	 */
+	bool addBorrowedBook(Books book) {
+		if (borrowedNo >= 5) {
+			cout << "Borrow limit reached, cannot borrow more books.";
+			return false;
 		}
-		Borrower(){}
-		void setBorrower(string f_name,string l_name, string phone_no){
-			fname = f_name;
-			lname = l_name;
-			phoneno = phone_no;
+		if (book.isBookBorrowed()) {
+			cout << "Book is already borrowed";
+			return false;
 		}
-		void setFirstName(string str){fname = str;}
-		void setLastName(string str){lname = str;}
-		void setPhoneNo(string str){phoneno = str;}
-		/**
-		 * @brief Borrow a book to the borrower
-		 * 
-		 * @param book the book to be borrowed
-		 * @returns true if book is successfully borrowed, false otherwise
-		 */
-		bool addBorrowedBook(Books book){
-			if(borrowedNo>=5){
-				cout  << "Borrow limit reached, cannot borrow more books.";
-				return false;
-			}
-			if(book.isBookBorrowed()){
+		for (Books bk : borrowedBooks) {
+			if (bk.equal(book)) {
 				cout << "Book is already borrowed";
 				return false;
 			}
-			for(Books bk:borrowedBooks){
-				if(bk.equal(book)){
-					cout << "Book is already borrowed";
-					return false;
-				}
-			}
-			borrowedBooks[borrowedNo] = book;
-			borrowedNo++;
 		}
-		/**
-		 * @brief return a book from the borrower
-		 * 
-		 * @param book the book to be returned
-		 */
-		void removeBorrowedBook(Books book){
-			int i; bool flag = false;
-			for(i=0;i<5;i++){
-				Books bk = borrowedBooks[i];
-				if(book.equal(bk)){
-					flag=true;
-					borrowedNo--;
-				}
-				if(flag && (i+1)<5){
-					borrowedBooks[i] = borrowedBooks[i+1];
-				}
-				else if((i+1)<5){
-					borrowedBooks[i] = Books();
-				}
+		borrowedBooks[borrowedNo] = book;
+		borrowedNo++;
+	}
+	/**
+	 * @brief return a book from the borrower
+	 *
+	 * @param book the book to be returned
+	 */
+	void removeBorrowedBook(Books book) {
+		int i; bool flag = false;
+		for (i = 0; i < 5; i++) {
+			Books bk = borrowedBooks[i];
+			if (book.equal(bk)) {
+				flag = true;
+				borrowedNo--;
 			}
-			borrowedBooks[i] = borrowedBooks[i+1];
+			if (flag && (i + 1) < 5) {
+				borrowedBooks[i] = borrowedBooks[i + 1];
+			}
+			else if ((i + 1) < 5) {
+				borrowedBooks[i] = Books();
+			}
 		}
-		string getFirstName(){return fname;}
-		string getLastName(){return lname;}
-		string getPhoneNo(){return phoneno;}
-		/**
-		 * @brief Get the Borrowed Books object and *stores* it into the array provided
-		 * 
-		 * @param bks the array used to store the borrowed book
-		 */
-		void getBorrowedBooks(Books bks[]){bks = borrowedBooks;}
-		/**
-		 * @brief Get the number of borrowed books by the user.
-		 * 
-		 * @return int the total number of borrowed books by the borrower
-		 */
-		int getBorrowedNo(){return borrowedNo;}
-	private:
-		string fname;
-		string lname;
-		string phoneno;
-		Books borrowedBooks[5];
-		int borrowedNo = 0;
+		borrowedBooks[i] = borrowedBooks[i + 1];
+	}
+	string getFirstName() { return fname; }
+	string getLastName() { return lname; }
+	string getPhoneNo() { return phoneno; }
+	/**
+	 * @brief Get the Borrowed Books object and *stores* it into the array provided
+	 *
+	 * @param bks the array used to store the borrowed book
+	 */
+	void getBorrowedBooks(Books bks[]) { bks = borrowedBooks; }
+	/**
+	 * @brief Get the number of borrowed books by the user.
+	 *
+	 * @return int the total number of borrowed books by the borrower
+	 */
+	int getBorrowedNo() { return borrowedNo; }
+private:
+	string fname;
+	string lname;
+	string phoneno;
+	Books borrowedBooks[5];
+	int borrowedNo = 0;
 };
 
 //Variables declaration here
@@ -404,77 +408,77 @@ Books books[1000];
 Borrower borrowers[1000];
 
 //Custom functions here
-bool checkYNvalid(char choice){
-    return (choice=='Y'||choice=='N');
+bool checkYNvalid(char choice) {
+	return (choice == 'Y' || choice == 'N');
 }
 
-bool checkYN(char choice){
-    return (choice=='Y');
+bool checkYN(char choice) {
+	return (choice == 'Y');
 }
 
-bool checkEmptyString(string s){
-    return s=="";
+bool checkEmptyString(string s) {
+	return s == "";
 }
-string toUppercase(string s){
-    for(int i=0;i<s.length();i++){
-        s[i] = toupper(s[i]);
-    }
+string toUppercase(string s) {
+	for (int i = 0; i < s.length(); i++) {
+		s[i] = toupper(s[i]);
+	}
 	return s;
 }
 //Main functions here
 //R1
-void displayBooks(){
+void displayBooks() {
 
 }
 
 /**
  * @brief Search for the locations of double quotes (") in a string, and returns it in an integer array.
- * 
+ *
  * @param inp the string to search on
  * @param positions the int array to be stroed
  */
-void findDoubleQuote(string inp, int positions[]){
-	int pos = -1, i=0;
-	do{
-		pos = inp.find("\"",pos+1);
+void findDoubleQuote(string inp, int positions[]) {
+	int pos = -1, i = 0;
+	do {
+		pos = inp.find("\"", pos + 1);
 		//if(pos==-1){break;}
 		positions[i] = pos;
-		cout << "i: " << i  << ",Pos: " << pos << endl;
+		cout << "i: " << i << ",Pos: " << pos << endl;
 		i++;
-	}while(pos!=string::npos || pos<inp.length() || pos!=-1);
+	} while (pos != string::npos || pos < inp.length() || pos != -1);
 	positions[i] = -1;
-	positions[i+1] = -1;
-	if(i%2==1){
-		positions[i-1] = -1;
+	positions[i + 1] = -1;
+	if (i % 2 == 1) {
+		positions[i - 1] = -1;
 	}
 }
 /**
  * @brief Check if the book info contains keyword
- * 
+ *
  * @param bk the Book object to be searched
  * @param kw the keyword to be searched
  * @param caseSensitive if set to true, only exact cases will be matched
  */
-bool checkMatchingBook(Books bk,string kw,bool caseSensitive){
+bool checkMatchingBook(Books bk, string kw, bool caseSensitive) {
 	Books t_bk = bk;
-    if(!caseSensitive){ //Case Insensitive
-        t_bk.setBookName(toUppercase(t_bk.getBookName()));
-        t_bk.setBookAuthor(toUppercase(t_bk.getBookAuthor()));
-        t_bk.setBookPublisher(toUppercase(t_bk.getBookPublisher()));
+	if (!caseSensitive) { //Case Insensitive
+		t_bk.setBookName(toUppercase(t_bk.getBookName()));
+		t_bk.setBookAuthor(toUppercase(t_bk.getBookAuthor()));
+		t_bk.setBookPublisher(toUppercase(t_bk.getBookPublisher()));
 		kw = toUppercase(kw);
-    }
-	if(kw==""){return false;}
+	}
+	if (kw == "") { return false; }
 	//cout << (t_bk.getBookName().find(kw)) << " " << (t_bk.getBookAuthor().find(kw)) << " " << (t_bk.getBookId().find(kw)) << " " << (t_bk.getBookPublisher().find(kw)) << endl;
 	//cout << kw;
 	return (
-			(t_bk.getBookName().find(kw)!=string::npos)
-		||  (t_bk.getBookAuthor().find(kw)!=string::npos)
-		||  (t_bk.getBookId().find(kw)!=string::npos)
-		||  (t_bk.getBookPublisher().find(kw)!=string::npos)
-	);
+		(t_bk.getBookName().find(kw) != string::npos)
+		|| (t_bk.getBookAuthor().find(kw) != string::npos)
+		|| (t_bk.getBookId().find(kw) != string::npos)
+		|| (t_bk.getBookPublisher().find(kw) != string::npos)
+		);
 }
 //R1.2
-void searchBooks(){
+void searchBooks() {
 	/*
 		Steps:
 		-Read every char 1 by 1
@@ -490,61 +494,61 @@ void searchBooks(){
 	cout << "Please enter the keyword(s): ";
 	cin.ignore(); //To make this work
 	getline(cin, inp);
-	
-	int i=0;
-	int j=0;
+
+	int i = 0;
+	int j = 0;
 	string concatStr = "";
 	bool isDoubleQuoted = false;
 	//Phrase the keywords
-	for(int i=0;i<inp.length();i++){
-	    if(inp[i]==' ' && !isDoubleQuoted && concatStr!=""){
-	        keywords[j] = concatStr;
-	        cout << j << endl;
-	        concatStr = "";
-	        j++;
-	    }
-	    else if(inp[i]=='"'){
-	        isDoubleQuoted = !isDoubleQuoted;
-	        if(!isDoubleQuoted && concatStr!=""){
-	            keywords[j] = concatStr;
-	            //cout << "Quoted: " << j << concatStr << endl;
-	            concatStr = "";
-	            j++;
-	        }
-	    }
-	    else{
-	        concatStr+=inp[i];
-	    }
+	for (int i = 0; i < inp.length(); i++) {
+		if (inp[i] == ' ' && !isDoubleQuoted && concatStr != "") {
+			keywords[j] = concatStr;
+			cout << j << endl;
+			concatStr = "";
+			j++;
+		}
+		else if (inp[i] == '"') {
+			isDoubleQuoted = !isDoubleQuoted;
+			if (!isDoubleQuoted && concatStr != "") {
+				keywords[j] = concatStr;
+				//cout << "Quoted: " << j << concatStr << endl;
+				concatStr = "";
+				j++;
+			}
+		}
+		else {
+			concatStr += inp[i];
+		}
 	}
 	keywords[j] = concatStr;
-	
+
 	//DEBUG print phrased keywords
-	for(int i=0;i<100;i++){
-		if(keywords[i]!=""){cout << i << keywords[i] << endl;}
+	for (int i = 0; i < 100; i++) {
+		if (keywords[i] != "") { cout << i << keywords[i] << endl; }
 	}
-	
+
 	//the find function SAVES AGAIN!
-	for(int i=0;i<1000;i++){
-	    for(string kw : keywords){
-	        if(checkMatchingBook(books[i],kw,false) && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())){
+	for (int i = 0; i < 1000; i++) {
+		for (string kw : keywords) {
+			if (checkMatchingBook(books[i], kw, false) && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())) {
 				//Temp. displaying method, will see what R1.1's display method is
-	            cout << "Searching " << kw << "\n";
-				cout<<"Found: " << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() <<endl;
+				cout << "Searching " << kw << "\n";
+				cout << "Found: " << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
 				cout << "================" << endl;
-	        }
-	    }
+			}
+		}
 	}
 }
 
 //R1.2
 [[deprecated("It does not work and overcomplicating lol")]]
-void searchBooksD(){
+void searchBooksD() {
 	string inp;
 	string keywords[100];
 	int quotePos[100];
 	cout << "Please enter the keyword(s): ";
 	cin.ignore(); //To make this work
-	getline (cin, inp);
+	getline(cin, inp);
 	/*
 		Steps:
 		1. Extract Terms with "" and store them in an array
@@ -552,109 +556,109 @@ void searchBooksD(){
 		2. Split the remaining string with space
 		3. Store them into an array.
 	*/
-	findDoubleQuote(inp,quotePos);
+	findDoubleQuote(inp, quotePos);
 	string ninp = inp;
-	if(quotePos[0]!=-1 || quotePos[1]!=-1){
-		int i=0;
+	if (quotePos[0] != -1 || quotePos[1] != -1) {
+		int i = 0;
 		int prevPos1 = 0, prevPos2 = 0;
-		do{
+		do {
 			prevPos1 = quotePos[i];
-			prevPos2 = quotePos[1+1];
-			keywords[i] = inp.substr(prevPos1+1,prevPos2-1);
-			cout << "K: " << keywords[i] << "," << quotePos[i] << "," << quotePos[i+1] << endl;
-			ninp.erase(prevPos1,prevPos2-prevPos1+1);
+			prevPos2 = quotePos[1 + 1];
+			keywords[i] = inp.substr(prevPos1 + 1, prevPos2 - 1);
+			cout << "K: " << keywords[i] << "," << quotePos[i] << "," << quotePos[i + 1] << endl;
+			ninp.erase(prevPos1, prevPos2 - prevPos1 + 1);
 			//prevPos1 = quotePos[i+1]+1;
-			i+=2;
-		}while(quotePos[i]!=-1);
+			i += 2;
+		} while (quotePos[i] != -1);
 	}
-	
+
 	string keyword_single[100];
-	CSVObject::split(ninp," ",keyword_single);
+	CSVObject::split(ninp, " ", keyword_single);
 	cout << ninp << endl;
-	for(int i=0;i<100;i++){
-		if(keywords[i]!=""){cout << i << keywords[i] << endl;}
-		if(keyword_single[i]!=""){cout << i << "s: " << keyword_single[i] << endl;}
+	for (int i = 0; i < 100; i++) {
+		if (keywords[i] != "") { cout << i << keywords[i] << endl; }
+		if (keyword_single[i] != "") { cout << i << "s: " << keyword_single[i] << endl; }
 	}
-	
+
 }
 
 bool idunique(string id) {
-    for (int i = 0; i < numbooks; i++) {
-        if (books[i].getBookId() == id) {
-            return false;
-        }
-    }
-    return true;
+	for (int i = 0; i < numbooks; i++) {
+		if (books[i].getBookId() == id) {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool yearpositive(int year) {
-    return year > 0;
+	return year > 0;
 }
 
 void addBooks() {
-    string id, title, author, publisher;
-    int year;
+	string id, title, author, publisher;
+	int year;
 	cin.ignore(); //To make this work
-    cout << "Enter book ID: ";
-    getline(cin, id);
-    while (id.length() > 10 || !idunique(id)) {
-        cout << "This ID is more than 10 characters! Enter book ID:";
-        cout << "Enter book ID:";
-        getline(cin, id);
-    }
-        
-    cout << "Enter book title: ";
-    getline(cin, title);
-    while (title.length() > 100) {
-        cout << "The title is more than 100 characters!";
-        cout << "Enter book title:";
-        getline(cin, title);
-    }
+	cout << "Enter book ID: ";
+	getline(cin, id);
+	while (id.length() > 10 || !idunique(id)) {
+		cout << "This ID is more than 10 characters! Enter book ID:";
+		cout << "Enter book ID:";
+		getline(cin, id);
+	}
 
-    cout << "Enter book author (if the book has more than one author, separated by ';'): ";
-    getline(cin, author);
-    while (author.length() > 50) {
-        cout << "The authors are more than 50 characters!: ";
-        cout << "Enter book author: ";
-        getline(cin, author);
-    }
+	cout << "Enter book title: ";
+	getline(cin, title);
+	while (title.length() > 100) {
+		cout << "The title is more than 100 characters!";
+		cout << "Enter book title:";
+		getline(cin, title);
+	}
 
-    cout << "Enter book publisher: ";
-    getline(cin, publisher);
-    while (publisher.length() > 50) {
-        cout << "The publisher is more then 50 characters!";
-        cout << "Enter book publisher: ";
-        getline(cin, publisher);
-    }
+	cout << "Enter book author (if the book has more than one author, separated by ';'): ";
+	getline(cin, author);
+	while (author.length() > 50) {
+		cout << "The authors are more than 50 characters!: ";
+		cout << "Enter book author: ";
+		getline(cin, author);
+	}
 
-    cout << "Enter book year: ";
-    cin >> year;
-    while (!yearpositive(year)) {
-        cout << "The year is not positive!";
-        cout << "Enter book year: ";
-        cin >> year;
-        cin.clear();
-        cin.ignore(numeric_limits < streamsize > ::max(), '\n');
-        cin.ignore();
-    }
-        
-    cin.ignore();
+	cout << "Enter book publisher: ";
+	getline(cin, publisher);
+	while (publisher.length() > 50) {
+		cout << "The publisher is more then 50 characters!";
+		cout << "Enter book publisher: ";
+		getline(cin, publisher);
+	}
 
-    books[numbooks] = Books(id, title, author, publisher, year);
-    numbooks++;
+	cout << "Enter book year: ";
+	cin >> year;
+	while (!yearpositive(year)) {
+		cout << "The year is not positive!";
+		cout << "Enter book year: ";
+		cin >> year;
+		cin.clear();
+		cin.ignore(numeric_limits < streamsize > ::max(), '\n');
+		cin.ignore();
+	}
 
-    cout << "Book added sucessfully!\n";
+	cin.ignore();
+
+	books[numbooks] = Books(id, title, author, publisher, year);
+	numbooks++;
+
+	cout << "Book added sucessfully!\n";
 }
 
 
-void removeBooks(){
+void removeBooks() {
 
 }
 
 //R1
-void manageBooks(){
+void manageBooks() {
 	char choice;
-	do{
+	do {
 		clrScr();
 		cout << "*** Manage Books ***" << endl;
 		cout << "[1] Display books" << endl;
@@ -667,117 +671,117 @@ void manageBooks(){
 
 		cin >> choice;
 
-		switch (choice){
-			case '1': displayBooks(); break;
-			case '2': searchBooks(); break;
-			case '3': addBooks(); break;
-			case '4': removeBooks(); break;
-			case '5': cout << "Qutting..."; break;
-			default: cout << "Non-valid choice, please enter again."; break;
+		switch (choice) {
+		case '1': displayBooks(); break;
+		case '2': searchBooks(); break;
+		case '3': addBooks(); break;
+		case '4': removeBooks(); break;
+		case '5': cout << "Qutting..."; break;
+		default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
 		pressContinue();
-	}while(choice!='5');
+	} while (choice != '5');
 }
 
 //R2
-void displayBorrowers(){
+void displayBorrowers() {
 
 }
 
-void searchBorrowers(){
+void searchBorrowers() {
 	int id;
 	cin.ignore();
 	cout << "Enter the borrower ID to search: ";
-	do{
+	do {
 		cin >> id;
-		if(cin.fail()){
+		if (cin.fail()) {
 			cout << "Invalid input, please try again.";
 		}
-	}while(cin.fail());
-	if(id>numBorrowers-1){
+	} while (cin.fail());
+	if (id > numBorrowers - 1) {
 		cout << "No borrower found.";
 	}
-	else if(borrowers[id].getLastName()!=""){
+	else if (borrowers[id].getLastName() != "") {
 		cout << "Borrower found";
 		cout << "Borrower ID: " << id << endl;
-    	cout << "Last name: " << borrowers[id].getLastName() << endl;
-    	cout << "First name: " << borrowers[id].getFirstName() << endl;
-    	cout << "Contact number: " << borrowers[id].getPhoneNo() << endl;
+		cout << "Last name: " << borrowers[id].getLastName() << endl;
+		cout << "First name: " << borrowers[id].getFirstName() << endl;
+		cout << "Contact number: " << borrowers[id].getPhoneNo() << endl;
 	}
-	else{
+	else {
 		cout << "No borrower found.";
 	}
 }
 
 string capitalize(string str) {
-    transform(str.begin(), str.end(), str.begin(), ::tolower);
-    string result = "";
-    bool capitalizeNext = true;
-    for (char c : str) {
-        if (isspace(c)) {
-            capitalizeNext = true;
-        }
-        else if (capitalizeNext) {
-            result += toupper(c);
-            capitalizeNext = false;
-        }
-        else {
-            result += c;
-        }
-    }
-    return result;
+	transform(str.begin(), str.end(), str.begin(), ::tolower);
+	string result = "";
+	bool capitalizeNext = true;
+	for (char c : str) {
+		if (isspace(c)) {
+			capitalizeNext = true;
+		}
+		else if (capitalizeNext) {
+			result += toupper(c);
+			capitalizeNext = false;
+		}
+		else {
+			result += c;
+		}
+	}
+	return result;
 }
 
 bool validContactNumber(string contactNumber) {
-    return (contactNumber.length() == 8) && (contactNumber[0] == '2' || contactNumber[0] == '3' || contactNumber[0] == '5' || contactNumber[0] == '6' || contactNumber[0] == '9');
+	return (contactNumber.length() == 8) && (contactNumber[0] == '2' || contactNumber[0] == '3' || contactNumber[0] == '5' || contactNumber[0] == '6' || contactNumber[0] == '9');
 }
 
 void addBorrowers() {
-    if (numBorrowers >= 1000) {
-        cout << "Error: borrower list is full." << endl;
-        return;
-    }
+	if (numBorrowers >= 1000) {
+		cout << "Error: borrower list is full." << endl;
+		return;
+	}
 
-    Borrower nborrower;
-    string lastName, firstName, contactNumber;
+	Borrower nborrower;
+	string lastName, firstName, contactNumber;
 	cin.ignore(); //To make this work
-    cout << "Enter last name: ";
-    getline(cin, lastName);
-    cout << "Enter first name: ";
-    getline(cin, firstName);
-    cout << "Enter contact number: ";
-    getline(cin, contactNumber);
+	cout << "Enter last name: ";
+	getline(cin, lastName);
+	cout << "Enter first name: ";
+	getline(cin, firstName);
+	cout << "Enter contact number: ";
+	getline(cin, contactNumber);
 
-    lastName = toUppercase(lastName);
-    firstName = capitalize(firstName);
+	lastName = toUppercase(lastName);
+	firstName = capitalize(firstName);
 
-    if (!validContactNumber(contactNumber)) {
-        cout << "Invalid contact number." << endl;
-        return;
-    }
+	if (!validContactNumber(contactNumber)) {
+		cout << "Invalid contact number." << endl;
+		return;
+	}
 
-    nborrower.setLastName(lastName);
-    nborrower.setFirstName(firstName);
-    nborrower.setPhoneNo(contactNumber);
+	nborrower.setLastName(lastName);
+	nborrower.setFirstName(firstName);
+	nborrower.setPhoneNo(contactNumber);
 
-    borrowers[numBorrowers] = nborrower;
-    numBorrowers++;
+	borrowers[numBorrowers] = nborrower;
+	numBorrowers++;
 
-    cout << "\nBorrower added successfully." << endl;
-    cout << "Borrower ID: " << numBorrowers << endl;
-    cout << "Last name: " << nborrower.getLastName() << endl;
-    cout << "First name: " << nborrower.getFirstName() << endl;
-    cout << "Contact number: " << nborrower.getPhoneNo() << endl;
+	cout << "\nBorrower added successfully." << endl;
+	cout << "Borrower ID: " << numBorrowers << endl;
+	cout << "Last name: " << nborrower.getLastName() << endl;
+	cout << "First name: " << nborrower.getFirstName() << endl;
+	cout << "Contact number: " << nborrower.getPhoneNo() << endl;
 }
 
-void removeBorrowers(){
-	
+void removeBorrowers() {
+
 }
 //R2 main
-void manageBorrowers(){
+void manageBorrowers() {
 	char choice;
-	do{
+	do {
 		clrScr();
 		cout << "*** Manage Borrowers ***" << endl;
 		cout << "[1] Display borrowers" << endl;
@@ -790,56 +794,59 @@ void manageBorrowers(){
 
 		cin >> choice;
 
-		switch (choice){
-			case '1': displayBorrowers(); break;
-			case '2': searchBorrowers(); break;
-			case '3': addBorrowers(); break;
-			case '4': removeBorrowers(); break;
-			case '5': cout << "Qutting..."; break;
-			default: cout << "Non-valid choice, please enter again."; break;
+		switch (choice) {
+		case '1': displayBorrowers(); break;
+		case '2': searchBorrowers(); break;
+		case '3': addBorrowers(); break;
+		case '4': removeBorrowers(); break;
+		case '5': cout << "Qutting..."; break;
+		default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
 		pressContinue();
-	}while(choice!='5');
+	} while (choice != '5');
 }
 
 //R3
-void borrowBook(){
+void borrowBook() {
 
 }
 
 //R4
-void returnBook(){
+void returnBook() {
 
 }
 
-void exportCSV(){
-	string path;
+void exportCSV() {
+	//Saving memory space so _ is used
 	cout << "Enter the path and file name for the Book List: ";
-	cin >> path;
+	cin >> _;
 	CSVObject ncsv_bk;
-	for(int i=0;i<1000;i++){
-		ncsv_bk.setElement(books[i].getBookId(),i,0);
-		ncsv_bk.setElement(books[i].getBookName(),i,1);
-		ncsv_bk.setElement(books[i].getBookAuthor(),i,2);
-		ncsv_bk.setElement(books[i].getBookPublisher(),i,3);
-		ncsv_bk.setElement(to_string(books[i].getBookYear()),i,4);
+	for (int i = 0; i < 1000; i++) {
+		ncsv_bk.setElement(books[i].getBookId(), i, 0);
+		ncsv_bk.setElement(books[i].getBookName(), i, 1);
+		ncsv_bk.setElement(books[i].getBookAuthor(), i, 2);
+		ncsv_bk.setElement(books[i].getBookPublisher(), i, 3);
+		ncsv_bk.setElement(to_string(books[i].getBookYear()), i, 4);
 	}
-	ncsv_bk.saveCSV(path);
-	/*
-	or(int i=0;i<1000;i++){
-		ncsv_bk.setElement(ncsv_bk.getBookId(),i,0);
-		ncsv_bk.setElement(ncsv_bk.getBookName(),i,0);
-		ncsv_bk.setElement(ncsv_bk.getBookAuthor(),i,0);
-		ncsv_bk.setElement(ncsv_bk.getBookPublisher(),i,0);
-		ncsv_bk.setElement(ncsv_bk.getBookYear(),i,0);
-	}*/
+	ncsv_bk.saveCSV(_);
+	cout << "Successfully exported books list.\n";
+	cout << "Enter the path and file name for the Book List: ";
+	cin >> _;
+	CSVObject ncsv_bwer;
+	for(int i=0;i<1000;i++){
+		ncsv_bwer.setElement(borrowers[i].getLastName(),i,0);
+		ncsv_bwer.setElement(borrowers[i].getFirstName(),i,1);
+		ncsv_bwer.setElement(borrowers[i].getPhoneNo(),i,2);
+	}/**/
+	ncsv_bwer.saveCSV(_);
+	cout << "Successfully exported borrowers list.";
 }
 
 //R5
-void usefulFeaturesMenu(){
+void usefulFeaturesMenu() {
 	char choice;
-	do{
+	do {
 		clrScr();
 		cout << "*** Usful features ***" << endl;
 		cout << "[1] Export CSV" << endl;
@@ -849,75 +856,73 @@ void usefulFeaturesMenu(){
 
 		cin >> choice;
 
-		switch (choice){
-			case '1': exportCSV(); break;
-			case '5': cout << "Qutting..."; break;
-			default: cout << "Non-valid choice, please enter again."; break;
+		switch (choice) {
+		case '1': exportCSV(); break;
+		case '5': cout << "Qutting..."; break;
+		default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
 		pressContinue();
-	}while(choice!='5');
+	} while (choice != '5');
 }
 
 //MAIN FUNCTION
 
-int main(){
-    char choice;
-    //Check if user wants to import from file for book list
-    do{
-        cout << "Import book list from file? [Y/N]: ";
-        cin >> choice;
+int main() {
+	char choice;
+	//Check if user wants to import from file for book list
+	do {
+		cout << "Import book list from file? [Y/N]: ";
+		cin >> choice;
 		choice = toupper(choice);
-        if(!checkYNvalid(choice)){
-            cout << "Invalid input, please type again.\n";
+		if (!checkYNvalid(choice)) {
+			cout << "Invalid input, please type again.\n";
 		}
-    }while(!checkYNvalid(choice));
-	if(checkYN(choice)){
-	    string path;
-	    cout << "Path of book list file: ";
-	    cin >> path;
-	    cout << "Importing book list... ";
-	    if(bookList.readCSV(path)){
-			for(int i=0;i<1000;i++){
-				if(bookList.getElement(i,0)==""){continue;}
+	} while (!checkYNvalid(choice));
+	if (checkYN(choice)) {
+		cout << "Path of book list file: ";
+		cin >> _;
+		cout << "Importing book list... ";
+		if (bookList.readCSV(_)) {
+			for (int i = 0; i < 1000; i++) {
+				if (bookList.getElement(i, 0) == "") { continue; }
 				books[i] = Books(
-					bookList.getElement(i,0), //ID
-					bookList.getElement(i,1), //Mame
-					bookList.getElement(i,2), //Author
-					bookList.getElement(i,3), //Publisher
-					stoi(bookList.getElement(i,4)) //Year
+					bookList.getElement(i, 0), //ID
+					bookList.getElement(i, 1), //Mame
+					bookList.getElement(i, 2), //Author
+					bookList.getElement(i, 3), //Publisher
+					stoi(bookList.getElement(i, 4)) //Year
 				);
 				numbooks++;
 			}
-	    	cout << "Done\n";
+			cout << "Done\n";
 		}
 		else
 			cout << "Error while importing. Book list will not be imported.\n";
 	}
-	else{
-	    cout << "No book list is imported \n";
+	else {
+		cout << "No book list is imported \n";
 	}
-	
+
 	//Check if user wants to import from file for borrow list
-    do{
-        cout << "Import borrower list from file? [Y/N]: ";
-        cin >> choice;
+	do {
+		cout << "Import borrower list from file? [Y/N]: ";
+		cin >> choice;
 		choice = toupper(choice);
-        if(!checkYNvalid(choice))
-            cout << "Invalid input, please type again.\n";
-    }while(!checkYNvalid(choice));
-	if(checkYN(choice)){
-	    string path;
-	    cout << "Path of borrower list file: ";
-	    cin >> path;
-	    cout << "Importing borrower list... ";
-	    if(borrowList.readCSV(path)){
-			for(int i=0;i<1000;i++){
-				if(borrowList.getElement(i,0)==""){continue;}
+		if (!checkYNvalid(choice))
+			cout << "Invalid input, please type again.\n";
+	} while (!checkYNvalid(choice));
+	if (checkYN(choice)) {
+		cout << "Path of borrower list file: ";
+		cin >> _;
+		cout << "Importing borrower list... ";
+		if (borrowList.readCSV(_)) {
+			for (int i = 0; i < 1000; i++) {
+				if (borrowList.getElement(i, 0) == "") { continue; }
 				borrowers[i] = Borrower(
-					borrowList.getElement(i,0), //First Name
-					borrowList.getElement(i,1), //Last Name
-					borrowList.getElement(i,2) //Phone number
+					borrowList.getElement(i, 0), //First Name
+					borrowList.getElement(i, 1), //Last Name
+					borrowList.getElement(i, 2) //Phone number
 				);
 				numBorrowers++;
 			}
@@ -926,15 +931,15 @@ int main(){
 		else
 			cout << "Error while importing. Borrower list will not be imported.\n";
 	}
-	else{
-	    cout << "No borrower list is imported \n";
+	else {
+		cout << "No borrower list is imported \n";
 	}
 
 	cout << "Setup completed.\n";
 	pressContinue();
-	
+
 	//MAIN MENU
-	do{
+	do {
 		clrScr();
 		cout << "*** Library Management System ***" << endl;
 		cout << "[1] Manage books" << endl;
@@ -948,27 +953,27 @@ int main(){
 		cout << "Option (1 - 7): " << endl;
 		cin >> choice;
 
-		switch (choice){
-			case '1': manageBooks(); break;
-			case '2': manageBorrowers(); break;
-			case '3': borrowBook(); break;
-			case '4': returnBook(); break;
-			case '5': usefulFeaturesMenu(); break;
-			case '6': memberList(); break;
-			case '7':
-				char quit;
-				cout << "Are you sure you want to quit? (Y/N): ";
-				do{
-					cin >> quit;
-					quit = toupper(quit);
-					//cout << quit;
-					//cout << (quit!='Y') << " " << (quit!='N');
-					if(quit!='Y'&&quit!='N'){cout << "invalid input. Please type again.";}
-					else if(quit=='N'){choice=8;}
-				}while(quit!='Y'&&quit!='N');
+		switch (choice) {
+		case '1': manageBooks(); break;
+		case '2': manageBorrowers(); break;
+		case '3': borrowBook(); break;
+		case '4': returnBook(); break;
+		case '5': usefulFeaturesMenu(); break;
+		case '6': memberList(); break;
+		case '7':
+			char quit;
+			cout << "Are you sure you want to quit? (Y/N): ";
+			do {
+				cin >> quit;
+				quit = toupper(quit);
+				//cout << quit;
+				//cout << (quit!='Y') << " " << (quit!='N');
+				if (quit != 'Y' && quit != 'N') { cout << "invalid input. Please type again."; }
+				else if (quit == 'N') { choice = 8; }
+			} while (quit != 'Y' && quit != 'N');
 			break;
 		}
-	}while(choice!='7');
+	} while (choice != '7');
 
 	cout << "Exiting program. Goodbye!";
 
