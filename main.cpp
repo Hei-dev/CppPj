@@ -188,7 +188,8 @@ public:
 		FILE* fw = fopen(fileLocation.c_str(), "w");
 		string dum_csv[1000][5];
 
-		bool skipLine = 0;
+		bool skipLine = false;
+		bool skipComma = false;
 		for (int r = 0; r < 1000; r++) {
 			for (int c = 0; c < 5; c++) {
 				dum_csv[r][c] = elements[r][c];
@@ -235,17 +236,17 @@ public:
 					//cout << dum_csv[r][c] << endl;
 				}
 				if (dum_csv[r][0] != "") {
+					//cout << dum_csv[r][0] << endl;
 					fprintf(fw, "%s", dum_csv[r][c].c_str());
-					//some very hacky code to make it work
-					if ((c != 4 && dum_csv[r][4]!="") || (c != 3 && dum_csv[r][4]=="")) { fprintf(fw, ","); }
 				}
-				
+				if (c != 4 && !skipComma) { fprintf(fw, ",");}else{ skipComma = false;}
 			}
 			if (!skipLine) {
 				fprintf(fw, "\n");
 			}
 			else{
 				skipLine = false;
+				skipComma = true;
 			}
 		}
 		fclose(fw);
