@@ -194,7 +194,7 @@ public:
 			for (int c = 0; c < 5; c++) {
 				dum_csv[r][c] = elements[r][c];
 				bool hasComma = false;
-				if(dum_csv[r][c] == ""){
+				if (dum_csv[r][c] == "") {
 					skipLine = true;
 					continue;
 				}
@@ -215,17 +215,18 @@ public:
 				if (dum_csv[r][c] != "") {
 					//cout << dum_csv[r][0] << endl;
 					fprintf(fw, "%s", dum_csv[r][c].c_str());
-					if (c != 4 && dum_csv[r][c].find("\n",0) == string::npos) {
-				        fprintf(fw, ",");
-				        //cout << "Comma " << dum_csv[r][c] << endl;
-				    }else{ skipComma = false;}
+					if (c != 4 && dum_csv[r][c].find("\n", 0) == string::npos) {
+						fprintf(fw, ",");
+						//cout << "Comma " << dum_csv[r][c] << endl;
+					}
+					else { skipComma = false; }
 				}
 			}
 			if (!skipLine) {
 				fprintf(fw, "\n");
 				skipComma = true;
 			}
-			else{
+			else {
 				skipLine = false;
 			}
 		}
@@ -353,20 +354,21 @@ public:
 	 */
 	void removeBorrowedBook(Books book) {
 		int i; bool flag = false;
+		
 		for (i = 0; i < 5; i++) {
 			Books bk = borrowedBooks[i];
 			if (book.equal(bk)) {
 				flag = true;
 				borrowedNo--;
 			}
-			if (flag && (i + 1) < 5) {
+			if (flag && (i + 1) != 5) {
 				borrowedBooks[i] = borrowedBooks[i + 1];
 			}
-			else if ((i + 1) < 5) {
+			else if ((i + 1) == 5) {
 				borrowedBooks[i] = Books();
 			}
 		}
-		borrowedBooks[i] = borrowedBooks[i + 1];
+		
 	}
 	string getFirstName() { return fname; }
 	string getLastName() { return lname; }
@@ -377,8 +379,8 @@ public:
 	 * @param bks the array used to store the borrowed book
 	 */
 	void getBorrowedBooks(Books bks[]) {
-	    for(int i=0;i<borrowedNo;i++)
-	        bks[i] = borrowedBooks[i];
+		for (int i = 0; i < borrowedNo; i++)
+			bks[i] = borrowedBooks[i];
 	}
 	/**
 	 * @brief Get the number of borrowed books by the user.
@@ -421,43 +423,43 @@ string toUppercase(string s) {
 }
 //Main functions here
 
-void sortBookList(){
+void sortBookList() {
 	Books nBooks[1000];
 	int nBkLen = 0;
-	for(int i=0;i<1000;i++){
-		if(books[i].getBookName()==""){
+	for (int i = 0; i < 1000; i++) {
+		if (books[i].getBookName() == "") {
 			continue;
 		}
 		int l;
-		for(l=0;l<nBkLen;l++){
-			if(nBooks[l].getBookName()>books[i].getBookName()){
+		for (l = 0; l < nBkLen; l++) {
+			if (nBooks[l].getBookName() > books[i].getBookName()) {
 				break;
 			}
 		}
-		
-		for(int k=nBkLen;k>l;k--){
-			nBooks[k] = nBooks[k-1];
+
+		for (int k = nBkLen; k > l; k--) {
+			nBooks[k] = nBooks[k - 1];
 		}
 		nBooks[l] = books[i];
 		nBkLen++;
 
 	}
-	for(int i=0;i<1000;i++)
+	for (int i = 0; i < 1000; i++)
 		books[i] = nBooks[i];
 }
 
 //R1
 void displayBooks() {
-	 sortBookList();
-	 //sortBookList();
-	 for(int i=0;i<1000;i++){
-		if(books[i].getBookName()==""){
+	sortBookList();
+	//sortBookList();
+	for (int i = 0; i < 1000; i++) {
+		if (books[i].getBookName() == "") {
 			continue;
 		}
 		cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
 		//cout << books[i].getBookName() << endl;
 		cout << "================" << endl;
-	 }
+	}
 }
 
 /**
@@ -708,49 +710,49 @@ void manageBooks() {
 }
 
 //R2
-void sortBorrowerList(){
+void sortBorrowerList() {
 	Borrower nBorrowers[1000];
 	int nBrLen = 0;
-	for(int i=0;i<1000;i++){
-		if(borrowers[i].getLastName()==""){
+	for (int i = 0; i < 1000; i++) {
+		if (borrowers[i].getLastName() == "") {
 			continue;
 		}
 		int l;
-		for(l=0;l<nBrLen;l++){
-		    if(nBorrowers[l].getLastName()!=borrowers[i].getLastName()){
-			    if(nBorrowers[l].getLastName()>borrowers[i].getLastName()){
-				    break;
-			    }
-		    }
-		    else{
-		        if(nBorrowers[l].getFirstName()>borrowers[i].getFirstName()){
-				    break;
-			    }
-		    }
+		for (l = 0; l < nBrLen; l++) {
+			if (nBorrowers[l].getLastName() != borrowers[i].getLastName()) {
+				if (nBorrowers[l].getLastName() > borrowers[i].getLastName()) {
+					break;
+				}
+			}
+			else {
+				if (nBorrowers[l].getFirstName() > borrowers[i].getFirstName()) {
+					break;
+				}
+			}
 		}
-		
-		for(int k=nBrLen;k>l;k--){
-			nBorrowers[k] = nBorrowers[k-1];
+
+		for (int k = nBrLen; k > l; k--) {
+			nBorrowers[k] = nBorrowers[k - 1];
 		}
 		nBorrowers[l] = borrowers[i];
 		nBrLen++;
 
 	}
-	for(int i=0;i<1000;i++)
+	for (int i = 0; i < 1000; i++)
 		borrowers[i] = nBorrowers[i];
 }
 
 //R1
 void displayBorrowers() {
-	 sortBorrowerList();
-	 for(int i=0;i<1000;i++){
-		if(borrowers[i].getLastName()==""){
+	sortBorrowerList();
+	for (int i = 0; i < 1000; i++) {
+		if (borrowers[i].getLastName() == "") {
 			continue;
 		}
 		cout << borrowers[i].getLastName() << " " << borrowers[i].getFirstName() << endl << borrowers[i].getPhoneNo() << endl;
 		//cout << books[i].getBookName() << endl;
 		cout << "================" << endl;
-	 }
+	}
 }
 void searchBorrowers() {
 	int id;
@@ -838,9 +840,44 @@ void addBorrowers() {
 	cout << "Contact number: " << nborrower.getPhoneNo() << endl;
 }
 
-void removeBorrowers() {
-
+void removeBorrower(int borrowerID) {
+  int borrowerIndex = -1;
+  for (int i = 0; i < numBorrowers; i++) {
+    if (i == borrowerID) {
+      borrowerIndex = i;
+      break;
+    }
+  }
+  if (borrowerIndex == -1) {
+    cout << "Borrower ID not found." << endl;
+  } else if (borrowers[borrowerIndex].getBorrowedNo() > 0) {
+    cout << "Borrower has borrowed books and cannot be removed." << endl;
+  } else {
+    cout << "Borrower details: " << borrowerIndex << endl;
+    cout << "Are you sure you want to remove this borrower? (Y/N): ";
+    char confirmation;
+    cin >> confirmation;
+    if (toupper(confirmation) == 'Y') {
+      for (int i = borrowerIndex; i < numBorrowers-1; i++) {
+        borrowers[i] = borrowers[i+1]; // shift borrowers to fill the empty slot
+      }
+      numBorrowers--; // decrease the number of borrowers in the system
+      cout << "Borrower has been removed." << endl;
+    }
+  }
 }
+
+void prepareRemoveBorrower(){
+	int borrowerID;
+	do{
+		cout << "Enter borrower ID: ";
+		cin >> borrowerID;
+		if(cin.fail())
+			cout << "Invalid input. Please type again.\n";
+	}while(cin.fail());
+    removeBorrower(borrowerID);
+}
+
 //R2 main
 void manageBorrowers() {
 	char choice;
@@ -861,7 +898,7 @@ void manageBorrowers() {
 		case '1': displayBorrowers(); break;
 		case '2': searchBorrowers(); break;
 		case '3': addBorrowers(); break;
-		case '4': removeBorrowers(); break;
+		case '4': prepareRemoveBorrower(); break;
 		case '5': cout << "Qutting..."; break;
 		default: cout << "Non-valid choice, please enter again."; break;
 		}
@@ -875,145 +912,161 @@ void manageBorrowers() {
  * @return if the book is available
  */
 bool checkBookAvailability(string bookID) {
-  for (int i = 0; i < numbooks; i++) {
-    if (books[i].getBookId() == bookID && !books[i].isBookBorrowed()) {
-      return true;
-    }
-  }
-  return false;
+	for (int i = 0; i < numbooks; i++) {
+		if (books[i].getBookId() == bookID && !books[i].isBookBorrowed()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 //R3
 void borrowBook(int borrowerID, string bookID) {
-  for (int i = 0; i < numbooks; i++) {
-    if (books[i].getBookId() == bookID) {
-      for (int j = 0; j < numBorrowers; j++) {
-        if (j == borrowerID) {
-          borrowers[j].addBorrowedBook(books[i]) ;// add book to borrower's list of borrowed books
-          //borrowers[j].numBooksBorrowed++;
-          books[i].setBookBorrowed(true); // update book availability
-          break;
-        }
-      }
-      break;
-    }
-  }
+	for (int i = 0; i < numbooks; i++) {
+		if (books[i].getBookId() == bookID) {
+			for (int j = 0; j < numBorrowers; j++) {
+				if (j == borrowerID) {
+					borrowers[j].addBorrowedBook(books[i]);// add book to borrower's list of borrowed books
+					//borrowers[j].numBooksBorrowed++;
+					books[i].setBookBorrowed(true); // update book availability
+					break;
+				}
+			}
+			break;
+		}
+	}
 }
 
 // Function to check if borrower ID is valid and still has quota to borrow more books
 bool checkBorrowerQuota(int borrowerID) {
-  for (int i = 0; i < numBorrowers; i++) {
-    if (i == borrowerID && borrowers[i].getBorrowedNo() < 5) {
-      return true;
-    }
-  }
-  return false;
+	for (int i = 0; i < numBorrowers; i++) {
+		if (i == borrowerID && borrowers[i].getBorrowedNo() < 5) {
+			return true;
+		}
+	}
+	return false;
 }
 
-void prepareBorrowBooks(){
-// Prompt for borrower ID
-  int borrowerID;
-  int numBorrowBooks;
-  do{
-  cout << "Enter borrower ID: ";
-  cin >> borrowerID;
-  if(cin.fail()){
-      cout << "Invalid input. Please try again.\n";
-  }
-  }while(cin.fail());
+void prepareBorrowBooks() {
+	// Prompt for borrower ID
+	int borrowerID;
+	int numBorrowBooks;
+	do {
+		cout << "Enter borrower ID: ";
+		cin >> borrowerID;
+		if (cin.fail()) {
+			cout << "Invalid input. Please try again.\n";
+		}
+	} while (cin.fail());
 
-  // Check if borrower ID is valid and still has quota to borrow more books
-  if (!checkBorrowerQuota(borrowerID)) {
-    cout << "This borrower cannot borrow more books." << endl;
-    return;
-  }
+	// Check if borrower ID is valid and still has quota to borrow more books
+	if (!checkBorrowerQuota(borrowerID)) {
+		cout << "This borrower cannot borrow more books." << endl;
+		pressContinue();
+		return;
+	}
 
-  // Prompt for number of books to borrow
-  do{
-  cout << "Enter number of books to borrow: ";
-  cin >> numBorrowBooks;
-  if(cin.fail()){
-      cout << "Invalid input. Please type again.\n";
-  }
-  }while(cin.fail());
+	// Prompt for number of books to borrow
+	do {
+		cout << "Enter number of books to borrow: ";
+		cin >> numBorrowBooks;
+		if (cin.fail()) {
+			cout << "Invalid input. Please type again.\n";
+		}
+	} while (cin.fail());
 
-  // Prompt for book IDs and borrow books
-  for (int i = 0; i < numBorrowBooks; i++) {
-      string bookID;
-    cout << "Enter book ID " << i+1 << ": ";
-    cin >> bookID;
-    if (checkBookAvailability(bookID)) {
-      borrowBook(borrowerID, bookID);
-      cout << "Book " << bookID << " has been borrowed." << endl;
-    } else {
-      cout << "Book " << bookID << " is not available." << endl;
-    }
-  }
-  pressContinue();
+	// Prompt for book IDs and borrow books
+	for (int i = 0; i < numBorrowBooks; i++) {
+		string bookID;
+		cout << "Enter book ID " << i + 1 << ": ";
+		cin >> bookID;
+		if (checkBookAvailability(bookID)) {
+			borrowBook(borrowerID, bookID);
+			cout << "Book " << bookID << " has been borrowed." << endl;
+		}
+		else {
+			cout << "Book " << bookID << " is not available." << endl;
+		}
+	}
+	pressContinue();
 }
 
 //R4
 void returnBook() {
-  int id, k, found = 0;
-  char choice = 'Y';
-  string bkid,name;
-  
-  cout << "Please enter your borrower ID: ";
-  
-  do{
-    cin >> id;
-    if(id > numBorrowers)
-      cout << "Invalid borrower ID! Please re-enter: ";
-    else
-      break;
-  } while(found == 0);
-  
-  if(borrowers[id].getBorrowedNo() == 0){
-    cout << "You didn't borrow any books!" << endl;
-    return;
-}
-Books borrowedBooks[5];
-borrowers[id].getBorrowedBooks(borrowedBooks);
-  while(checkYN(choice) && borrowers[id].getBorrowedNo() != 0){
-    cout << "Please enter the book ID of the book you want to return : ";
-    cin >> bkid;
-        
-    Books rBk;
-    while(found == 0){
-      for(int i = 0; i < 5; i++){
-        Books bk = borrowedBooks[i];
-        if (books[i].getBookId() == bkid){
-          found = 1;
-          k = i;
-          name = books[i].getBookName();
-          rBk = books[i];
-        }
-        break;
-      } 
-      if (found == 0) {
-        cout << "Invalid book ID! Please re-enter: ";
-        cin >> bkid;
-      }
-    }
+	int id, k, found = 0;
+	char choice = 'Y';
+	string bkid;
 
-    borrowers[id].removeBorrowedBook(rBk);
-    books[k].setBookBorrowed(false);
-    cout << name << "is returned succesfully!" << endl;
-    
-    if(borrowers[id].getBorrowedNo() == 0){
-      cout << "You returned all the book(s)!" << endl;
-      return;
-    }
-    
-    cout << "Any other book you want to return? [Y/N]";
-    do{
-      cin >> choice;
-      choice = toupper(choice);
-      if(choice!='Y'||choice!='N')
-        cout << "Invalid input. Please type again.";
-    }while(!checkYNvalid(choice));
-  }
-  pressContinue();
+	cout << "Please enter your borrower ID: ";
+
+	do {
+		cin >> id;
+		if (id > numBorrowers)
+			cout << "Invalid borrower ID! Please re-enter: ";
+		else
+			break;
+	} while (found == 0);
+
+	if (borrowers[id].getBorrowedNo() == 0) {
+		cout << "You didn't borrow any books!" << endl;
+		pressContinue();
+		cin.ignore();
+		return;
+	}
+	Books borrowedBooks[5];
+	borrowers[id].getBorrowedBooks(borrowedBooks);
+	for (Books bk : borrowedBooks)
+		cout << bk.getBookId() << endl;
+	while (checkYN(choice) && borrowers[id].getBorrowedNo() != 0) {
+		cout << "Please enter the book ID of the book you want to return : ";
+		cin >> bkid;
+
+		Books rBk;
+		while (found == 0) {
+			for (int i = 0; i < 5; i++) {
+				Books bk = borrowedBooks[i];
+				//cout << bk.getBookId() << "==" << bkid << endl;
+				
+				if (bk.getBookId() == bkid) {
+					found = 1;
+					k = i;
+					//name = bk.getBookName();
+					rBk = bk;
+					break;
+				}
+				
+			}
+			if (found == 0) {
+				cout << "Invalid book ID! Please re-enter: ";
+				cin >> bkid;
+			}
+		}
+		borrowers[id].removeBorrowedBook(rBk);
+		
+		for (int i = 0; i < 1000; i++) {
+			if (books[i].equal(rBk)) {
+				books[i].setBookBorrowed(false);
+				break;
+			}
+		}
+		
+		cout << rBk.getBookName() << " is returned succesfully!" << endl;
+
+		if (borrowers[id].getBorrowedNo() == 0) {
+			cout << "You returned all the book(s)!" << endl;
+			pressContinue();
+			return;
+		}
+
+		cout << "Any other book you want to return? [Y/N]";
+		do {
+			cin >> choice;
+			choice = toupper(choice);
+			if (choice != 'Y' && choice != 'N')
+				cout << "Invalid input. Please type again.";
+		} while (!checkYNvalid(choice));
+	}
+	pressContinue();
 }
 
 void exportCSV() {
@@ -1031,14 +1084,14 @@ void exportCSV() {
 	ncsv_bk.saveCSV(_);
 	cout << "Successfully exported books list.\n";
 }
-void exportBorrowerCSV(){
+void exportBorrowerCSV() {
 	cout << "Enter the path and file name for the Borrower List: ";
 	cin >> _;
 	CSVObject ncsv_bwer;
-	for(int i=0;i<1000;i++){
-		ncsv_bwer.setElement(borrowers[i].getLastName(),i,0);
-		ncsv_bwer.setElement(borrowers[i].getFirstName(),i,1);
-		ncsv_bwer.setElement(borrowers[i].getPhoneNo(),i,2);
+	for (int i = 0; i < 1000; i++) {
+		ncsv_bwer.setElement(borrowers[i].getLastName(), i, 0);
+		ncsv_bwer.setElement(borrowers[i].getFirstName(), i, 1);
+		ncsv_bwer.setElement(borrowers[i].getPhoneNo(), i, 2);
 	}/**/
 	ncsv_bwer.saveCSV(_);
 	cout << "Successfully exported borrowers list.";
@@ -1169,8 +1222,6 @@ int main() {
 			do {
 				cin >> quit;
 				quit = toupper(quit);
-				//cout << quit;
-				//cout << (quit!='Y') << " " << (quit!='N');
 				if (quit != 'Y' && quit != 'N') { cout << "invalid input. Please type again."; }
 				else if (quit == 'N') { choice = 8; }
 			} while (quit != 'Y' && quit != 'N');
