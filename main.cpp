@@ -354,7 +354,7 @@ public:
 	 */
 	void removeBorrowedBook(Books book) {
 		int i; bool flag = false;
-		
+
 		for (i = 0; i < 5; i++) {
 			Books bk = borrowedBooks[i];
 			if (book.equal(bk)) {
@@ -368,7 +368,7 @@ public:
 				borrowedBooks[i] = Books();
 			}
 		}
-		
+
 	}
 	string getFirstName() { return fname; }
 	string getLastName() { return lname; }
@@ -841,41 +841,43 @@ void addBorrowers() {
 }
 
 void removeBorrower(int borrowerID) {
-  int borrowerIndex = -1;
-  for (int i = 0; i < numBorrowers; i++) {
-    if (i == borrowerID) {
-      borrowerIndex = i;
-      break;
-    }
-  }
-  if (borrowerIndex == -1) {
-    cout << "Borrower ID not found." << endl;
-  } else if (borrowers[borrowerIndex].getBorrowedNo() > 0) {
-    cout << "Borrower has borrowed books and cannot be removed." << endl;
-  } else {
-    cout << "Borrower details: " << borrowerIndex << endl;
-    cout << "Are you sure you want to remove this borrower? (Y/N): ";
-    char confirmation;
-    cin >> confirmation;
-    if (toupper(confirmation) == 'Y') {
-      for (int i = borrowerIndex; i < numBorrowers-1; i++) {
-        borrowers[i] = borrowers[i+1]; // shift borrowers to fill the empty slot
-      }
-      numBorrowers--; // decrease the number of borrowers in the system
-      cout << "Borrower has been removed." << endl;
-    }
-  }
+	int borrowerIndex = -1;
+	for (int i = 0; i < numBorrowers; i++) {
+		if (i == borrowerID) {
+			borrowerIndex = i;
+			break;
+		}
+	}
+	if (borrowerIndex == -1) {
+		cout << "Borrower ID not found." << endl;
+	}
+	else if (borrowers[borrowerIndex].getBorrowedNo() > 0) {
+		cout << "Borrower has borrowed books and cannot be removed." << endl;
+	}
+	else {
+		cout << "Borrower details: " << borrowerIndex << endl;
+		cout << "Are you sure you want to remove this borrower? (Y/N): ";
+		char confirmation;
+		cin >> confirmation;
+		if (toupper(confirmation) == 'Y') {
+			for (int i = borrowerIndex; i < numBorrowers - 1; i++) {
+				borrowers[i] = borrowers[i + 1]; // shift borrowers to fill the empty slot
+			}
+			numBorrowers--; // decrease the number of borrowers in the system
+			cout << "Borrower has been removed." << endl;
+		}
+	}
 }
 
-void prepareRemoveBorrower(){
+void prepareRemoveBorrower() {
 	int borrowerID;
-	do{
+	do {
 		cout << "Enter borrower ID: ";
 		cin >> borrowerID;
-		if(cin.fail())
+		if (cin.fail())
 			cout << "Invalid input. Please type again.\n";
-	}while(cin.fail());
-    removeBorrower(borrowerID);
+	} while (cin.fail());
+	removeBorrower(borrowerID);
 }
 
 //R2 main
@@ -1026,7 +1028,7 @@ void returnBook() {
 			for (int i = 0; i < 5; i++) {
 				Books bk = borrowedBooks[i];
 				//cout << bk.getBookId() << "==" << bkid << endl;
-				
+
 				if (bk.getBookId() == bkid) {
 					found = 1;
 					k = i;
@@ -1034,7 +1036,7 @@ void returnBook() {
 					rBk = bk;
 					break;
 				}
-				
+
 			}
 			if (found == 0) {
 				cout << "Invalid book ID! Please re-enter: ";
@@ -1042,14 +1044,14 @@ void returnBook() {
 			}
 		}
 		borrowers[id].removeBorrowedBook(rBk);
-		
+
 		for (int i = 0; i < 1000; i++) {
 			if (books[i].equal(rBk)) {
 				books[i].setBookBorrowed(false);
 				break;
 			}
 		}
-		
+
 		cout << rBk.getBookName() << " is returned succesfully!" << endl;
 
 		if (borrowers[id].getBorrowedNo() == 0) {
