@@ -193,35 +193,12 @@ public:
 		for (int r = 0; r < 1000; r++) {
 			for (int c = 0; c < 5; c++) {
 				dum_csv[r][c] = elements[r][c];
-				/*
-				if(dum_csv[r][c]==""){
-					//cout << "continue" << endl;
-					skipLine++;
-					continue;
-				}
-				//Looks for quote and add quote
-				int positions[16];
-				fill_n(positions,16,-1);
-				finds("\"",dum_csv[r][c],positions);
-				for(int i=9;i>=0;i--){
-					if(positions[i]==string::npos || positions[i]==-1){
-						//cout << "NPOS" << endl;
-						continue;
-					}
-					//cout << positions[i] << endl;
-					dum_csv[r][c].insert(positions[i],"\"");
-				}
-
-				if(dum_csv[r][c].find(",",0)!=string::npos){
-					dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
-					cout << dum_csv[r][c] << endl;
-				}/**/
-
 				bool hasComma = false;
 				if(dum_csv[r][c] == ""){
 					skipLine = true;
 					continue;
 				}
+				//cout << r << "," << c << ":" << dum_csv[r][c] << endl;
 				for (int k = 0; k < dum_csv[r][c].length(); k++) {
 					if (dum_csv[r][c][k] == '\"') {
 						dum_csv[r][c].insert(k, "\"");
@@ -235,18 +212,21 @@ public:
 					dum_csv[r][c] = "\"" + dum_csv[r][c] + "\"";
 					//cout << dum_csv[r][c] << endl;
 				}
-				if (dum_csv[r][0] != "") {
+				if (dum_csv[r][c] != "") {
 					//cout << dum_csv[r][0] << endl;
 					fprintf(fw, "%s", dum_csv[r][c].c_str());
+					if (c != 4 && dum_csv[r][c].find("\n",0) == string::npos) {
+				        fprintf(fw, ",");
+				        //cout << "Comma " << dum_csv[r][c] << endl;
+				    }else{ skipComma = false;}
 				}
-				if (c != 4 && !skipComma) { fprintf(fw, ",");}else{ skipComma = false;}
 			}
 			if (!skipLine) {
 				fprintf(fw, "\n");
+				skipComma = true;
 			}
 			else{
 				skipLine = false;
-				skipComma = true;
 			}
 		}
 		fclose(fw);
@@ -364,6 +344,7 @@ public:
 		}
 		borrowedBooks[borrowedNo] = book;
 		borrowedNo++;
+		return true;
 	}
 	/**
 	 * @brief return a book from the borrower
@@ -841,6 +822,8 @@ void exportCSV() {
 	}
 	ncsv_bk.saveCSV(_);
 	cout << "Successfully exported books list.\n";
+}
+void exportBorrowerCSV(){
 	cout << "Enter the path and file name for the Book List: ";
 	cin >> _;
 	CSVObject ncsv_bwer;
@@ -859,7 +842,8 @@ void usefulFeaturesMenu() {
 	do {
 		clrScr();
 		cout << "*** Usful features ***" << endl;
-		cout << "[1] Export CSV" << endl;
+		cout << "[1] Export Book CSV" << endl;
+		cout << "[2] Export Borrower CSV" << endl;
 		cout << "[5] Back" << endl;
 		cout << "********************" << endl;
 		cout << "Option (1 - 5):" << endl;
@@ -868,6 +852,7 @@ void usefulFeaturesMenu() {
 
 		switch (choice) {
 		case '1': exportCSV(); break;
+		case '2': exportBorrowerCSV(); break;
 		case '5': cout << "Qutting..."; break;
 		default: cout << "Non-valid choice, please enter again."; break;
 		}
