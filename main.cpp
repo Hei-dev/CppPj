@@ -417,9 +417,50 @@ string toUppercase(string s) {
 	return s;
 }
 //Main functions here
+
+void sortBookList(){
+	Books nBooks[1000];
+	int nBkLen = 0;
+	for(int i=0;i<1000;i++){
+		if(books[i].getBookName()==""){
+			continue;
+		}
+		int l;
+		for(l=0;l<nBkLen;l++){
+			int j = 0;
+			//Check same character
+			do{
+				j++;
+			}while(nBooks[l].getBookName()[j]!=books[i].getBookName()[j]);
+			if(nBooks[l].getBookName()[j]<books[i].getBookName()[j]){
+				cout << nBooks[l].getBookName()<< " < " <<books[i].getBookName() << endl;
+				break;
+			}
+		}
+		
+		for(int k=nBkLen;k>=l;k--){
+			nBooks[k+1] = nBooks[k];
+		}
+		nBooks[l] = books[i];
+		nBkLen++;
+
+	}
+	for(int i=0;i<1000;i++)
+		books[i] = nBooks[i];
+}
+
 //R1
 void displayBooks() {
-
+	 sortBookList();
+	 //sortBookList();
+	 for(int i=0;i<1000;i++){
+		if(books[i].getBookName()==""){
+			continue;
+		}
+		//cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
+		cout << books[i].getBookName() << endl;
+		cout << "================" << endl;
+	 }
 }
 
 /**
@@ -434,7 +475,7 @@ void findDoubleQuote(string inp, int positions[]) {
 		pos = inp.find("\"", pos + 1);
 		//if(pos==-1){break;}
 		positions[i] = pos;
-		cout << "i: " << i << ",Pos: " << pos << endl;
+		//cout << "i: " << i << ",Pos: " << pos << endl;
 		i++;
 	} while (pos != string::npos || pos < inp.length() || pos != -1);
 	positions[i] = -1;
@@ -512,11 +553,6 @@ void searchBooks() {
 		}
 	}
 	keywords[j] = concatStr;
-
-	//DEBUG print phrased keywords
-	for (int i = 0; i < 100; i++) {
-		if (keywords[i] != "") { cout << i << keywords[i] << endl; }
-	}
 
 	//the find function SAVES AGAIN!
 	for (int i = 0; i < 1000; i++) {
@@ -824,7 +860,7 @@ void exportCSV() {
 	cout << "Successfully exported books list.\n";
 }
 void exportBorrowerCSV(){
-	cout << "Enter the path and file name for the Book List: ";
+	cout << "Enter the path and file name for the Borrower List: ";
 	cin >> _;
 	CSVObject ncsv_bwer;
 	for(int i=0;i<1000;i++){
