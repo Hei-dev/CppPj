@@ -427,19 +427,13 @@ void sortBookList(){
 		}
 		int l;
 		for(l=0;l<nBkLen;l++){
-			int j = 0;
-			//Check same character
-			do{
-				j++;
-			}while(nBooks[l].getBookName()[j]!=books[i].getBookName()[j]);
-			if(nBooks[l].getBookName()[j]<books[i].getBookName()[j]){
-				cout << nBooks[l].getBookName()<< " < " <<books[i].getBookName() << endl;
+			if(nBooks[l].getBookName()>books[i].getBookName()){
 				break;
 			}
 		}
 		
-		for(int k=nBkLen;k>=l;k--){
-			nBooks[k+1] = nBooks[k];
+		for(int k=nBkLen;k>l;k--){
+			nBooks[k] = nBooks[k-1];
 		}
 		nBooks[l] = books[i];
 		nBkLen++;
@@ -457,8 +451,8 @@ void displayBooks() {
 		if(books[i].getBookName()==""){
 			continue;
 		}
-		//cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
-		cout << books[i].getBookName() << endl;
+		cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
+		//cout << books[i].getBookName() << endl;
 		cout << "================" << endl;
 	 }
 }
@@ -712,10 +706,50 @@ void manageBooks() {
 }
 
 //R2
-void displayBorrowers() {
+void sortBorrowerList(){
+	Borrower nBorrowers[1000];
+	int nBrLen = 0;
+	for(int i=0;i<1000;i++){
+		if(borrowers[i].getLastName()==""){
+			continue;
+		}
+		int l;
+		for(l=0;l<nBrLen;l++){
+		    if(nBorrowers[l].getLastName()!=borrowers[i].getLastName()){
+			    if(nBorrowers[l].getLastName()>borrowers[i].getLastName()){
+				    break;
+			    }
+		    }
+		    else{
+		        if(nBorrowers[l].getFirstName()>borrowers[i].getFirstName()){
+				    break;
+			    }
+		    }
+		}
+		
+		for(int k=nBrLen;k>l;k--){
+			nBorrowers[k] = nBorrowers[k-1];
+		}
+		nBorrowers[l] = borrowers[i];
+		nBrLen++;
 
+	}
+	for(int i=0;i<1000;i++)
+		borrowers[i] = nBorrowers[i];
 }
 
+//R1
+void displayBorrowers() {
+	 sortBorrowerList();
+	 for(int i=0;i<1000;i++){
+		if(borrowers[i].getLastName()==""){
+			continue;
+		}
+		cout << borrowers[i].getLastName() << " " << borrowers[i].getFirstName() << endl << borrowers[i].getPhoneNo() << endl;
+		//cout << books[i].getBookName() << endl;
+		cout << "================" << endl;
+	 }
+}
 void searchBorrowers() {
 	int id;
 	cin.ignore();
