@@ -376,7 +376,10 @@ public:
 	 *
 	 * @param bks the array used to store the borrowed book
 	 */
-	void getBorrowedBooks(Books bks[]) { bks = borrowedBooks; }
+	void getBorrowedBooks(Books bks[]) {
+	    for(int i=0;i<borrowedNo;i++)
+	        bks[i] = borrowedBooks[i];
+	}
 	/**
 	 * @brief Get the number of borrowed books by the user.
 	 *
@@ -671,7 +674,6 @@ void addBooks() {
 	cout << "Book added sucessfully!\n";
 }
 
-
 void removeBooks() {
 
 }
@@ -868,14 +870,150 @@ void manageBorrowers() {
 	} while (choice != '5');
 }
 
-//R3
-void borrowBook() {
+/* @brief Function to check if book ID is valid and available
+ * @param bookID the book ID to be searched
+ * @return if the book is available
+ */
+bool checkBookAvailability(string bookID) {
+  for (int i = 0; i < numbooks; i++) {
+    if (books[i].getBookId() == bookID && !books[i].isBookBorrowed()) {
+      return true;
+    }
+  }
+  return false;
+}
 
+//R3
+void borrowBook(int borrowerID, string bookID) {
+  for (int i = 0; i < numbooks; i++) {
+    if (books[i].getBookId() == bookID) {
+      for (int j = 0; j < numBorrowers; j++) {
+        if (j == borrowerID) {
+          borrowers[j].addBorrowedBook(books[i]) ;// add book to borrower's list of borrowed books
+          //borrowers[j].numBooksBorrowed++;
+          books[i].setBookBorrowed(true); // update book availability
+          break;
+        }
+      }
+      break;
+    }
+  }
+}
+
+// Function to check if borrower ID is valid and still has quota to borrow more books
+bool checkBorrowerQuota(int borrowerID) {
+  for (int i = 0; i < numBorrowers; i++) {
+    if (i == borrowerID && borrowers[i].getBorrowedNo() < 5) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void prepareBorrowBooks(){
+// Prompt for borrower ID
+  int borrowerID;
+  int numBorrowBooks;
+  do{
+  cout << "Enter borrower ID: ";
+  cin >> borrowerID;
+  if(cin.fail()){
+      cout << "Invalid input. Please try again.\n";
+  }
+  }while(cin.fail());
+
+  // Check if borrower ID is valid and still has quota to borrow more books
+  if (!checkBorrowerQuota(borrowerID)) {
+    cout << "This borrower cannot borrow more books." << endl;
+    return;
+  }
+
+  // Prompt for number of books to borrow
+  do{
+  cout << "Enter number of books to borrow: ";
+  cin >> numBorrowBooks;
+  if(cin.fail()){
+      cout << "Invalid input. Please type again.\n";
+  }
+  }while(cin.fail());
+
+  // Prompt for book IDs and borrow books
+  for (int i = 0; i < numBorrowBooks; i++) {
+      string bookID;
+    cout << "Enter book ID " << i+1 << ": ";
+    cin >> bookID;
+    if (checkBookAvailability(bookID)) {
+      borrowBook(borrowerID, bookID);
+      cout << "Book " << bookID << " has been borrowed." << endl;
+    } else {
+      cout << "Book " << bookID << " is not available." << endl;
+    }
+  }
+  pressContinue();
 }
 
 //R4
 void returnBook() {
+  int id, k, found = 0;
+  char choice = 'Y';
+  string bkid,name;
+  
+  cout << "Please enter your borrower ID: ";
+  
+  do{
+    cin >> id;
+    if(id > numBorrowers)
+      cout << "Invalid borrower ID! Please re-enter: ";
+    else
+      break;
+  } while(found == 0);
+  
+  if(borrowers[id].getBorrowedNo() == 0){
+    cout << "You didn't borrow any books!" << endl;
+    return;
+}
+Books borrowedBooks[5];
+borrowers[id].getBorrowedBooks(borrowedBooks);
+  while(checkYN(choice) && borrowers[id].getBorrowedNo() != 0){
+    cout << "Please enter the book ID of the book you want to return : ";
+    cin >> bkid;
+        
+    Books rBk;
+    while(found == 0){
+      for(int i = 0; i < 5; i++){
+        Books bk = borrowedBooks[i];
+        if (books[i].getBookId() == bkid){
+          found = 1;
+          k = i;
+          name = books[i].getBookName();
+          rBk = books[i];
+        }
+        break;
+      } 
+      if (found == 0) {
+        cout << "Invalid book ID! Please re-enter: ";
+        cin >> bkid;
+      }
+    }
 
+    borrowers[id].removeBorrowedBook(rBk);
+    books[k].setBookBorrowed(false);
+    cout << name << "is returned succesfully!" << endl;
+    
+    if(borrowers[id].getBorrowedNo() == 0){
+      cout << "You returned all the book(s)!" << endl;
+      return;
+    }
+    
+    cout << "Any other book you want to return? [Y/N]";
+    do{
+      cin >> choice;
+      choice = toupper(choice);
+      if(choice!='Y'||choice!='N')
+        cout << "Invalid input. Please type again.";
+    }while(!checkYNvalid(choice));
+  }
+  pressContinue();
 }
 
 void exportCSV() {
@@ -1021,7 +1159,7 @@ int main() {
 		switch (choice) {
 		case '1': manageBooks(); break;
 		case '2': manageBorrowers(); break;
-		case '3': borrowBook(); break;
+		case '3': prepareBorrowBooks(); break;
 		case '4': returnBook(); break;
 		case '5': usefulFeaturesMenu(); break;
 		case '6': memberList(); break;
