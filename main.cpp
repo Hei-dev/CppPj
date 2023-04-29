@@ -18,11 +18,6 @@ int numBorrowers = 0;
 
 string _;
 
-void memberList() {
-	cout << "Members list";
-
-}
-
 void pressContinue() {
 #if _WIN32
 	system("pause");
@@ -39,6 +34,48 @@ void clrScr() {
 	cout << "Please wait...\n";
 	system("clear");
 #endif
+}
+
+void memberList() {
+	cout << "Members list\n";
+	string vals[] = {
+"CHEUNG Chi Hang",
+"21011304A",
+"201B",
+"21011304A@common.cpce-polyu.edu.hk",
+"6",
+"CHOW Ying Hang",
+"22166096A",
+"201B",
+"22166096A@common.cpce-polyu.edu.hk",
+"6",
+"KWAN Tsun Hin",
+"22049666A",
+"201B",
+"22049666A@common.cpce-polyu.edu.hk",
+"6",
+"TSUI Lok Hei",
+"22155069A",
+"201B",
+"22155069A@common.cpce-polyu.edu.hk",
+"6",
+"YAU Siu Hung",
+"21016570A",
+"201B",
+"21016570A@common.cpce-polyu.edu.hk",
+"6",
+"YIP Ka Tsuen",
+"22160701A",
+"201B",
+"22160701A@common.cpce-polyu.edu.hk",
+"6"
+	};
+	cout << setw(20) << "Eng Name" << setw(10) << "StudentNo" << setw(5) << "Tut" << setw(5) << "Gp." << endl;
+	cout << setw(20) << "--------" << setw(10) << "---------" << setw(5) << "---" << setw(5) << "---" << endl;
+	for (int i = 0; i < 30; i+=5) {
+		cout << setw(20) << vals[i] << setw(10) << vals[i + 1] << setw(5) << vals[i + 2] << setw(5) << vals[i + 4] << endl;
+	}
+	pressContinue();
 }
 
 //Create class/objects here
@@ -292,7 +329,7 @@ public:
 	void setBookYear(int yr) { bk_yr = yr; }
 	void setBookBorrowed(bool isBorrowed) { bk_borrowed = isBorrowed; }
 	float rating = 0;
-	int ratingNo=0;
+	int ratingNo = 0;
 	string getBookId() { return bk_id; }
 	string getBookName() { return bk_name; }
 	string getBookAuthor() { return bk_author; }
@@ -391,11 +428,11 @@ public:
 	 * @return int the total number of borrowed books by the borrower
 	 */
 	int getBorrowedNo() { return borrowedNo; }
-	bool hasReviewedBook(string bkid){
-	    return reviewedBks.find(bkid)!=string::npos;
+	bool hasReviewedBook(string bkid) {
+		return reviewedBks.find(bkid) != string::npos;
 	}
-	void addReviewedBook(string bkid){
-	    reviewedBks += bkid + ",";
+	void addReviewedBook(string bkid) {
+		reviewedBks += bkid + ",";
 	}
 private:
 	string fname;
@@ -458,19 +495,20 @@ void sortBookList() {
 		books[i] = nBooks[i];
 }
 
-void displayBookInfo(Books book){
-    cout << book.getBookId() << setw(15) << book.getBookName() << endl;
-        cout << setw(15) << book.getBookAuthor() << setw(30) << setprecision(2) << (book.rating/book.ratingNo) << "☆" << endl;
-        cout << setw(15) << book.getBookPublisher() << " (" << book.getBookYear() << ")" << setw(30) << book.ratingNo << " People" << endl;
-        cout << setw(15) << (book.isBookBorrowed() ? "Borrowed" : "Available") << endl;
+void displayBookInfo(Books book) {
+	cout << left << setw(15) << book.getBookId() << setw(30) << book.getBookName() << endl;
+	cout << left << setw(15) << "" << setw(30) << book.getBookAuthor() << setprecision(2) << book.rating / (book.ratingNo==0 ? 1 : book.ratingNo) << "☆" << endl;
+	cout << left << setw(15) << "" << setw(30) << book.getBookPublisher() + " (" + to_string(book.getBookYear()) + ")" << setw(30) << to_string(book.ratingNo) + " People" << endl;
+	cout << left << setw(15) << "" << setw(30) << "" << setw(12) << "" << setw(12) << (book.isBookBorrowed() ? "Borrowed" : "Available") << endl;
 }
 
 //R1
 void displayBooks() {
 	sortBookList();
 	//sortBookList();
-	cout << "ID"<<setw(15)<<"Book Details"<<setw(30)<<"AvgRating"<<setw(10)<<"Availability\n";
-    cout << "--"<<setw(15)<<"------------"<<setw(30)<<"---------"<<setw(10)<<"------------\n";
+	cout << left << setw(15) << "ID" << setw(30) << "Book Details" << setw(12) << "AvgRating" << setw(12) << "Availability\n";
+	cout << left << setw(15) << "--" << setw(30) << "------------" << setw(12) << "---------" << setw(12) << "------------\n";
+	
 	for (int i = 0; i < 1000; i++) {
 		if (books[i].getBookName() == "") {
 			continue;
@@ -573,6 +611,7 @@ void searchBooks() {
 	}
 	keywords[j] = concatStr;
 
+	bool found = false;
 	//the find function SAVES AGAIN!
 	for (int i = 0; i < 1000; i++) {
 		for (string kw : keywords) {
@@ -581,8 +620,12 @@ void searchBooks() {
 				cout << "Found for keyword(s) \" " << kw << "\": \n";
 				displayBookInfo(books[i]);
 				cout << "================" << endl;
+				found = true;
 			}
 		}
+	}
+	if (!found) {
+		cout << "No book found.\n";
 	}
 }
 
@@ -697,7 +740,48 @@ void addBooks() {
 }
 
 void removeBooks() {
+	string book_id;
+	cout << "Enter the book ID to remove: ";
+	cin >> book_id;
 
+	bool book_found = false;
+	for (int i = 0; i < numbooks; ++i) {
+		if (books[i].getBookId() == book_id) {
+			book_found = true;
+			if (!books[i].isBookBorrowed()) {
+				char confirmation;
+				cout << "Book details:\n";
+				//cout << "ID: " << books[i].getBookId() << ", Title: " << books[i].getBookName() << ", Status: " << endl;
+				displayBookInfo(books[i]);
+				cout << "Are you sure you want to delete this book? (Y/N): ";
+				do {
+					cin >> confirmation;
+					confirmation = toupper(confirmation);
+					if (confirmation != 'Y' && confirmation != 'N') { cout << "invalid input. Please type again."; }
+				} while (confirmation != 'Y' && confirmation != 'N');
+				if (confirmation == 'Y') {
+					for (int j = i; j < numbooks - 1; ++j) {
+						books[j] = books[j + 1];
+					}
+					--numbooks;
+					cout << "The book has been removed.\n";
+					break;
+				}
+				else {
+					cout << "No book has been removed.\n";
+					break;
+				}
+			}
+			else {
+				cout << "The book is not available (borrowed).\n";
+			}
+			break;
+		}
+	}
+
+	if (!book_found) {
+		cout << "Book ID not found.\n";
+	}
 }
 
 //R1
@@ -1119,61 +1203,61 @@ void exportBorrowerCSV() {
 	cout << "Successfully exported borrowers list.";
 }
 
-void addRating(){
-    int bId,rating;
-    do{
-        cout << "Please input your Borrower ID: ";
-    cin>>bId;
-    if(cin.fail()){
-        cout << "Invalid input, please try again.";
-    }
-    }while(cin.fail());
-    Borrower* br;
-    int i;
-    for(i=0;i<numBorrowers;i++){
-        if(i==bId){
-            break;
-        }
-    }
-    if(i!=bId){
-        cout << "Cannot find the requested borrower. Returning to menu...\n";
-        return;
-    }
-    br=&borrowers[i];
-    do{
-    cout << "Please input the book ID to rate: ";
-    cin >> _;
-    if(cin.fail()){
-        cout << "Invalid input, please try again.";
-    }
-    }while(cin.fail());
-    for(i=0;i<numbooks;i++){
-        if(books[i].getBookId()==_){
-            break;
-        }
-    }
-    if(books[i].getBookId()!=_){
-        cout << "Cannot find the requested borrower. Returning to menu...\n";
-        return;
-    }
-    if(br->hasReviewedBook(books[i].getBookId())){
-        cout << "User has already reviewed the book. Exiting...";
-        return;
-    }
-    do{
-    cout << "Please enter your rating(0-5): ";
-    cin >> rating;
-    if(cin.fail()){
-        cout << "Invalid input, please try again.";
-    }
-    if(rating>5||rating<0){
-        cout << "Invalid rating. Please enter again.";
-    }
-    }while(cin.fail()||rating>5||rating<0);
-    books[i].rating += rating;
-    books[i].ratingNo ++;
-    br->addReviewedBook(books[i].getBookId());
-    cout << "Rating added.\n";
+void addRating() {
+	int bId, rating;
+	do {
+		cout << "Please input your Borrower ID: ";
+		cin >> bId;
+		if (cin.fail()) {
+			cout << "Invalid input, please try again.";
+		}
+	} while (cin.fail());
+	Borrower* br;
+	int i;
+	for (i = 0; i < numBorrowers; i++) {
+		if (i == bId) {
+			break;
+		}
+	}
+	if (i != bId) {
+		cout << "Cannot find the requested borrower. Returning to menu...\n";
+		return;
+	}
+	br = &borrowers[i];
+	do {
+		cout << "Please input the book ID to rate: ";
+		cin >> _;
+		if (cin.fail()) {
+			cout << "Invalid input, please try again.";
+		}
+	} while (cin.fail());
+	for (i = 0; i < numbooks; i++) {
+		if (books[i].getBookId() == _) {
+			break;
+		}
+	}
+	if (books[i].getBookId() != _) {
+		cout << "Cannot find the requested borrower. Returning to menu...\n";
+		return;
+	}
+	if (br->hasReviewedBook(books[i].getBookId())) {
+		cout << "User has already reviewed the book. Exiting...";
+		return;
+	}
+	do {
+		cout << "Please enter your rating(0-5): ";
+		cin >> rating;
+		if (cin.fail()) {
+			cout << "Invalid input, please try again.";
+		}
+		if (rating > 5 || rating < 0) {
+			cout << "Invalid rating. Please enter again.";
+		}
+	} while (cin.fail() || rating > 5 || rating < 0);
+	books[i].rating += rating;
+	books[i].ratingNo++;
+	br->addReviewedBook(books[i].getBookId());
+	cout << "Rating added.\n";
 }
 
 //R5
