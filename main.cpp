@@ -291,6 +291,8 @@ public:
 	void setBookPublisher(string str) { bk_pub = str; }
 	void setBookYear(int yr) { bk_yr = yr; }
 	void setBookBorrowed(bool isBorrowed) { bk_borrowed = isBorrowed; }
+	float rating = 0;
+	int ratingNo=0;
 	string getBookId() { return bk_id; }
 	string getBookName() { return bk_name; }
 	string getBookAuthor() { return bk_author; }
@@ -322,6 +324,7 @@ public:
 	void setFirstName(string str) { fname = str; }
 	void setLastName(string str) { lname = str; }
 	void setPhoneNo(string str) { phoneno = str; }
+	string ratedBk = "";
 	/**
 	 * @brief Borrow a book to the borrower
 	 *
@@ -388,12 +391,19 @@ public:
 	 * @return int the total number of borrowed books by the borrower
 	 */
 	int getBorrowedNo() { return borrowedNo; }
+	bool hasReviewedBook(string bkid){
+	    return reviewedBks.find(bkid)!=string::npos;
+	}
+	void addReviewedBook(string bkid){
+	    reviewedBks += bkid + ",";
+	}
 private:
 	string fname;
 	string lname;
 	string phoneno;
 	Books borrowedBooks[5];
 	int borrowedNo = 0;
+	string reviewedBks;
 };
 
 //Variables declaration here
@@ -448,15 +458,25 @@ void sortBookList() {
 		books[i] = nBooks[i];
 }
 
+void displayBookInfo(Books book){
+    cout << book.getBookId() << setw(15) << book.getBookName() << endl;
+        cout << setw(15) << book.getBookAuthor() << setw(30) << setprecision(2) << (book.rating/book.ratingNo) << "☆" << endl;
+        cout << setw(15) << book.getBookPublisher() << " (" << book.getBookYear() << ")" << setw(30) << book.ratingNo << " People" << endl;
+        cout << setw(15) << (book.isBookBorrowed() ? "Borrowed" : "Available") << endl;
+}
+
 //R1
 void displayBooks() {
 	sortBookList();
 	//sortBookList();
+	cout << "ID"<<setw(15)<<"Book Details"<<setw(30)<<"AvgRating"<<setw(10)<<"Availability\n";
+    cout << "--"<<setw(15)<<"------------"<<setw(30)<<"---------"<<setw(10)<<"------------\n";
 	for (int i = 0; i < 1000; i++) {
 		if (books[i].getBookName() == "") {
 			continue;
 		}
-		cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
+		displayBookInfo(books[i]);
+		//cout << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
 		//cout << books[i].getBookName() << endl;
 		cout << "================" << endl;
 	}
@@ -558,8 +578,8 @@ void searchBooks() {
 		for (string kw : keywords) {
 			if (checkMatchingBook(books[i], kw, false) && !checkEmptyString(kw) && !checkEmptyString(books[i].getBookName())) {
 				//Temp. displaying method, will see what R1.1's display method is
-				cout << "Searching " << kw << "\n";
-				cout << "Found: " << books[i].getBookId() << setw(18) << books[i].getBookYear() << endl << books[i].getBookName() << "\nBy " << books[i].getBookAuthor() << books[i].getBookPublisher() << endl;
+				cout << "Found for keyword(s) \" " << kw << "\": \n";
+				displayBookInfo(books[i]);
 				cout << "================" << endl;
 			}
 		}
@@ -591,7 +611,7 @@ void searchBooksD() {
 			prevPos1 = quotePos[i];
 			prevPos2 = quotePos[1 + 1];
 			keywords[i] = inp.substr(prevPos1 + 1, prevPos2 - 1);
-			cout << "K: " << keywords[i] << "," << quotePos[i] << "," << quotePos[i + 1] << endl;
+			//cout << "K: " << keywords[i] << "," << quotePos[i] << "," << quotePos[i + 1] << endl;
 			ninp.erase(prevPos1, prevPos2 - prevPos1 + 1);
 			//prevPos1 = quotePos[i+1]+1;
 			i += 2;
@@ -1099,6 +1119,63 @@ void exportBorrowerCSV() {
 	cout << "Successfully exported borrowers list.";
 }
 
+void addRating(){
+    int bId,rating;
+    do{
+        cout << "Please input your Borrower ID: ";
+    cin>>bId;
+    if(cin.fail()){
+        cout << "Invalid input, please try again.";
+    }
+    }while(cin.fail());
+    Borrower* br;
+    int i;
+    for(i=0;i<numBorrowers;i++){
+        if(i==bId){
+            break;
+        }
+    }
+    if(i!=bId){
+        cout << "Cannot find the requested borrower. Returning to menu...\n";
+        return;
+    }
+    br=&borrowers[i];
+    do{
+    cout << "Please input the book ID to rate: ";
+    cin >> _;
+    if(cin.fail()){
+        cout << "Invalid input, please try again.";
+    }
+    }while(cin.fail());
+    for(i=0;i<numbooks;i++){
+        if(books[i].getBookId()==_){
+            break;
+        }
+    }
+    if(books[i].getBookId()!=_){
+        cout << "Cannot find the requested borrower. Returning to menu...\n";
+        return;
+    }
+    if(br->hasReviewedBook(books[i].getBookId())){
+        cout << "User has already reviewed the book. Exiting...";
+        return;
+    }
+    do{
+    cout << "Please enter your rating(0-5): ";
+    cin >> rating;
+    if(cin.fail()){
+        cout << "Invalid input, please try again.";
+    }
+    if(rating>5||rating<0){
+        cout << "Invalid rating. Please enter again.";
+    }
+    }while(cin.fail()||rating>5||rating<0);
+    books[i].rating += rating;
+    books[i].ratingNo ++;
+    br->addReviewedBook(books[i].getBookId());
+    cout << "Rating added.\n";
+}
+
 //R5
 void usefulFeaturesMenu() {
 	char choice;
@@ -1107,6 +1184,7 @@ void usefulFeaturesMenu() {
 		cout << "*** Usful features ***" << endl;
 		cout << "[1] Export Book CSV" << endl;
 		cout << "[2] Export Borrower CSV" << endl;
+		cout << "[3] Add rating for book" << endl;
 		cout << "[5] Back" << endl;
 		cout << "********************" << endl;
 		cout << "Option (1 - 5):" << endl;
@@ -1116,11 +1194,13 @@ void usefulFeaturesMenu() {
 		switch (choice) {
 		case '1': exportCSV(); break;
 		case '2': exportBorrowerCSV(); break;
+		case '3': addRating(); break;
 		case '5': cout << "Qutting..."; break;
 		default: cout << "Non-valid choice, please enter again."; break;
 		}
 		cout << "\n";
 		pressContinue();
+		cin.ignore();
 	} while (choice != '5');
 }
 
